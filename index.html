@@ -93,6 +93,7 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
  </section>
 
  <section class="screen" id="s-prayers">
+  <select id="pm" aria-label="mosque"></select>
   <div class="next"><div class="small" id="tNext" style="color:#fff;opacity:.85"></div><div class="big" id="nextName">–</div><div id="nextIn" style="font-weight:600">–</div></div>
   <div class="card times" id="times"></div>
   <div class="card row">
@@ -129,6 +130,7 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="i18n.js"></script>
+<script src="mosques.js"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -156,16 +158,10 @@ const toast=m=>{const x=$('#toast');x.textContent=m;x.classList.add('on');setTim
 /* ---------- données d'exemple (fictives) ---------- */
 const TOULOUSE={lat:43.6047,lng:1.4442}; // ville de départ du projet
 let pos=store.get('pos',TOULOUSE);
-const MOSQUEES=[
- {id:1,nom:'Mosquée Al-Nour',type:'mosque',lat:43.6112,lng:1.4380,adr:'Centre (exemple)',color:'#0B8F7A'},
- {id:2,nom:'Mosquée Al-Fath',type:'mosque',lat:43.5990,lng:1.4560,adr:'Sud (exemple)',color:'#1B6FB5'},
- {id:3,nom:'Association Iqra',type:'assoc',lat:43.6180,lng:1.4650,adr:'Nord (exemple)',color:'#B5651B'},
- {id:4,nom:'Mosquée Ar-Rahma',type:'mosque',lat:43.5920,lng:1.4290,adr:'Ouest (exemple)',color:'#7B3FB5'}
-];
-const STORIES={1:['Cours de tafsir\nce soir après Maghrib','Khutba de vendredi :\nla patience'],2:['Collecte de Ramadan\nouverte à partir de lundi'],3:['Conférence samedi 15h\nSalle principale','Inscriptions aux cours d\'arabe\nouvertes'],4:['Fermeture exceptionnelle\ndemain matin']};
+const STORIES={};
 const PRAYERS=['jumua','fajr','dhuhr','asr','maghrib','isha','tarawih','eid'];
 const dist=(a,b)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dg=r(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
-const mq=id=>MOSQUEES.find(m=>m.id===id);
+const mq=id=>id===99?DEMO:MOSQUEES.find(m=>m.id===id);
 
 /* ---------- navigation ---------- */
 function go(k){
@@ -192,7 +188,7 @@ function applyLang(){
  $('#nav').innerHTML=TABS.map(k=>`<button data-t="${k}" class="${(SUB[cur]||cur)===k?'on':''}">${I[k]}<span>${t(k)}</span></button>`).join('');
  $('#locate').textContent=t('locate');$('#tNearby').textContent=t('nearby')+(dist(pos,TOULOUSE)<30?' · Toulouse':'');$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
  $('#storiesNote').textContent=t('storiesNote');$('#newRdv').textContent=t('newRdv');
- setTitle();renderList();prieres();renderStories();renderRole();renderRdv();renderCurrent();
+ setTitle();fillPm();renderList();loadTimes();renderStories();renderRole();renderRdv();renderCurrent();
  $('#back').textContent=RTL.includes(lang)?'→':'←';
 }
 function pickLang(){
@@ -213,12 +209,12 @@ function initMap(){
 }
 function renderList(){
  const l=MOSQUEES.map(m=>({...m,d:dist(pos,m)})).sort((a,b)=>a.d-b.d);
- $('#list').innerHTML=l.map(m=>`<div class="mosque" data-id="${m.id}"><div class="ico">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b> <span class="badge">${I.check}</span><div class="small">${t(m.type)} · ${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>`).join('');
+ $('#list').innerHTML=l.map(m=>`<div class="mosque" data-id="${m.id}"><div class="ico">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>`).join('');
 }
 $('#list').onclick=e=>{const r=e.target.closest('.mosque');if(r)openMosque(+r.dataset.id)};
 function openMosque(id){
  const m=mq(id);
- $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${t(m.type)} · ${t('verified')} · ${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0">${esc(m.adr)}</p>
+ $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
  <button class="btn" id="cov">${t('carpool')}</button><div style="height:8px"></div><button class="btn ghost" id="cl">${t('close')}</button>`;
  $('#sheet').classList.add('on');
  $('#cl').onclick=()=>$('#sheet').classList.remove('on');
@@ -230,28 +226,44 @@ $('#locate').onclick=()=>{
  navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lng:p.coords.longitude};store.set('pos',pos);renderList();loadTimes();if(map)map.setView([pos.lat,pos.lng],13);toast(t('posOk'))},()=>toast(t('posNo')));
 };
 
-/* ---------- prières ---------- */
+/* ---------- prières (par mosquée) ---------- */
 const FALLBACK={fajr:'06:12',dhuhr:'13:05',asr:'15:48',maghrib:'18:02',isha:'19:30'};
-const API={fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'};
-let horaires=FALLBACK,live=false;
+const KEYS=['fajr','dhuhr','asr','maghrib','isha'],API={fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'};
+// Méthode du site de la mosquée du Mirail : Ligue islamique mondiale, Fajr/Isha 15°, Dhuhr +1 min, Maghrib +5 min
+const MIRAIL_Q='&method=99&methodSettings=15,null,15&tune=0,0,0,1,0,5,0,0,0';
+let prayMosque=store.get('pm',0),horaires=FALLBACK,live=false,iqama=null,srcKey='src_city';
+const addMin=(h,n)=>{const[a,b]=h.split(':').map(Number),t=a*60+b+n;return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
 async function loadTimes(){
- try{const r=await fetch(`https://api.aladhan.com/v1/timings?latitude=${pos.lat}&longitude=${pos.lng}&method=12`);const j=await r.json();
-  horaires={};for(const k in FALLBACK)horaires[k]=j.data.timings[API[k]].slice(0,5);live=true}
+ const m=prayMosque?mq(prayMosque):null,p=m?{lat:m.lat,lng:m.lng}:(dist(pos,TOULOUSE)<30?pos:TOULOUSE);iqama=null;
+ srcKey=m?'src_'+m.src:'src_city';
+ if(m&&m.src==='mawaqit'){
+  const d=new Date(),row=MURET.cal[d.getMonth()][d.getDate()];
+  horaires={fajr:row[0],dhuhr:row[2],asr:row[3],maghrib:row[4],isha:row[5]};
+  iqama={};['fajr','dhuhr','asr','maghrib'].forEach(k=>iqama[k]=addMin(horaires[k],MURET.iqamaMin));iqama.isha=MURET.ishaIqama;live=true;return prieres();
+ }
+ const method=(m&&m.src==='mirail')?MIRAIL_Q:'&method=12';
+ try{const r=await fetch(`https://api.aladhan.com/v1/timings?latitude=${p.lat}&longitude=${p.lng}${method}`);const j=await r.json();
+  horaires={};KEYS.forEach(k=>horaires[k]=j.data.timings[API[k]].slice(0,5));live=true}
  catch(e){horaires=FALLBACK;live=false}
  prieres();
 }
 function prieres(){
  const now=new Date(),mins=h=>{const[a,b]=h.split(':');return +a*60+ +b},c=now.getHours()*60+now.getMinutes();
- let nxt=Object.keys(horaires).find(k=>mins(horaires[k])>c),diff;
+ let nxt=KEYS.find(k=>mins(horaires[k])>c),diff;
  if(nxt)diff=mins(horaires[nxt])-c;else{nxt='fajr';diff=1440-c+mins(horaires.fajr)}
  $('#nextName').textContent=t(nxt);
  $('#nextIn').textContent=t('inT',{h:Math.floor(diff/60),m:String(diff%60).padStart(2,'0')})+' · '+horaires[nxt];
- $('#times').innerHTML=Object.keys(horaires).map(k=>`<div class="${k===nxt?'cur':''}"><span>${t(k)}</span><span dir="ltr">${horaires[k]}</span></div>`).join('')+(live?'':`<div class="small" style="border:0">${t('demoTimes')}</div>`);
+ const m=prayMosque?mq(prayMosque):null;
+ $('#times').innerHTML=KEYS.map(k=>`<div class="${k===nxt?'cur':''}"><span>${t(k)}</span><span dir="ltr">${horaires[k]}${iqama?' <span class="small">· '+t('iqama')+' '+iqama[k]+'</span>':''}</span></div>`).join('')
+  +(m&&m.src==='mawaqit'?`<div><span>${t('jumua')}</span><span dir="ltr">${MURET.jumua}</span></div>`:'')
+  +`<div class="small" style="border:0;display:block">${live?t(srcKey):t('demoTimes')}</div>`;
  const r=x=>x*Math.PI/180,K={lat:21.4225,lng:39.8262};
  const y=Math.sin(r(K.lng-pos.lng))*Math.cos(r(K.lat)),x=Math.cos(r(pos.lat))*Math.sin(r(K.lat))-Math.sin(r(pos.lat))*Math.cos(r(K.lat))*Math.cos(r(K.lng-pos.lng));
  const b=(Math.atan2(y,x)*180/Math.PI+360)%360;
  $('#needle').style.transform=`rotate(${b}deg)`;$('#qibla').textContent=t('deg',{d:Math.round(b)});
 }
+function fillPm(){$('#pm').innerHTML='<option value="0">'+t('cityTlse')+'</option>'+MOSQUEES.map(m=>`<option value="${m.id}">${esc(m.nom)}</option>`).join('');$('#pm').value=String(prayMosque)}
+$('#pm').onchange=e=>{prayMosque=+e.target.value;store.set('pm',prayMosque);loadTimes()};
 
 /* ---------- rôle ---------- */
 let role=store.get('role','fidele');
@@ -259,15 +271,17 @@ function renderRole(){
  const m=role==='mosquee';
  $('#roleTag').hidden=!m;$('#roleTag').innerHTML=m?I.check+t('verified'):'';
  $('#pubBox').innerHTML=m?`<div class="card"><h2>${t('pubTitle')}</h2><input class="field" id="stTxt" placeholder="${t('pubPh')}"><button class="btn" id="stPub">${t('pubBtn')}</button></div>`:'';
- if(m)$('#stPub').onclick=()=>{const v=$('#stTxt').value.trim();if(!v)return toast(t('pubEmpty'));STORIES[1].unshift(v);store.set('st1',STORIES[1]);renderStories();$('#stTxt').value='';toast(t('pubDone'))};
+ if(m)$('#stPub').onclick=()=>{const v=$('#stTxt').value.trim();if(!v)return toast(t('pubEmpty'));STORIES[99].unshift(v);store.set('st99',STORIES[99]);renderStories();$('#stTxt').value='';toast(t('pubDone'))};
 }
 
 /* ---------- stories (lecture seule pour les fidèles) ---------- */
-let seen=store.get('seen',{});STORIES[1]=store.get('st1',STORIES[1]);
+let seen=store.get('seen',{});STORIES[99]=store.get('st99',[]);
 function renderStories(){
- $('#storyRow').innerHTML=MOSQUEES.map(m=>`<button class="story ${seen[m.id]?'seen':''}" data-id="${m.id}"><div class="ring"><div class="in"><span style="background:${m.color}">${esc(m.nom.split(' ').pop()[0])}</span></div></div><p>${esc(m.nom.replace('Mosquée ','').replace('Association ',''))}</p></button>`).join('');
+ const list=MOSQUEES.concat(role==='mosquee'||STORIES[99].length?[DEMO]:[]);
+ const nm=m=>m.nom.replace('Mosquée ','').replace('Grande ','').replace(/\(.*\)/,'').trim();
+ $('#storyRow').innerHTML=list.map(m=>{const has=(STORIES[m.id]||[]).length>0;return `<button class="story ${seen[m.id]||!has?'seen':''}" data-id="${m.id}"><div class="ring"><div class="in"><span style="background:${m.color}">${esc(nm(m)[0])}</span></div></div><p>${esc(nm(m))}</p></button>`}).join('');
 }
-$('#storyRow').onclick=e=>{const b=e.target.closest('.story');if(b)playStory(+b.dataset.id)};
+$('#storyRow').onclick=e=>{const b=e.target.closest('.story');if(!b)return;const id=+b.dataset.id;if(!(STORIES[id]||[]).length)return toast(t('noStory'));playStory(id)};
 let tm;
 function playStory(id,i=0){
  const m=mq(id),L=STORIES[id]||[];
