@@ -280,7 +280,7 @@ function clearRoute(){routeLines.forEach(l=>map.removeLayer(l));routeLines=[];$(
 $('#rtClose').onclick=clearRoute;
 function openMosque(id){
  const m=mq(id);
- $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
+ $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}${MAWAQIT[m.id]?`<p style="margin-bottom:4px"><a href="https://mawaqit.net/en/m/${MAWAQIT[m.id].slug}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">Mawaqit</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
  <button class="btn" id="cov">${t('carpool')}</button><div style="height:8px"></div><button class="btn ghost" id="cl">${t('close')}</button>`;
  $('#sheet').classList.add('on');
  $('#cl').onclick=()=>$('#sheet').classList.remove('on');
@@ -311,9 +311,10 @@ async function loadTimes(){
  const m=prayMosque?mq(prayMosque):null,p=m?{lat:m.lat,lng:m.lng}:(dist(pos,TOULOUSE)<30?pos:TOULOUSE);iqama=null;
  srcKey=m?'src_'+m.src:'src_city';
  if(m&&m.src==='mawaqit'){
-  const d=new Date(),row=MURET.cal[d.getMonth()][d.getDate()];
+  const d=new Date(),W=MAWAQIT[m.id],row=W.cal[d.getMonth()][d.getDate()],iq=(W.iqama[d.getMonth()]||{})[d.getDate()];
   horaires={fajr:row[0],dhuhr:row[2],asr:row[3],maghrib:row[4],isha:row[5]};
-  iqama={};['fajr','dhuhr','asr','maghrib'].forEach(k=>iqama[k]=addMin(horaires[k],MURET.iqamaMin));iqama.isha=MURET.ishaIqama;live=true;return prieres();
+  iqama=null;if(iq){iqama={};KEYS.forEach((k,n)=>{const v=iq[n];iqama[k]=/^\+/.test(v)?addMin(horaires[k],+v.slice(1)):v})}
+  live=true;return prieres();
  }
  const method=(m&&m.src==='mirail')?MIRAIL_Q:'&method=12';
  try{const r=await fetch(`https://api.aladhan.com/v1/timings?latitude=${p.lat}&longitude=${p.lng}${method}`);const j=await r.json();
@@ -329,7 +330,7 @@ function prieres(){
  $('#nextIn').textContent=t('inT',{h:Math.floor(diff/60),m:String(diff%60).padStart(2,'0')})+' · '+horaires[nxt];
  const m=prayMosque?mq(prayMosque):null;
  $('#times').innerHTML=KEYS.map(k=>`<div class="${k===nxt?'cur':''}"><span>${t(k)}</span><span dir="ltr">${horaires[k]}${iqama?' <span class="small">· '+t('iqama')+' '+iqama[k]+'</span>':''}</span></div>`).join('')
-  +(m&&m.src==='mawaqit'?`<div><span>${t('jumua')}</span><span dir="ltr">${MURET.jumua}</span></div>`:'')
+  +(m&&m.src==='mawaqit'?`<div><span>${t('jumua')}</span><span dir="ltr">${MAWAQIT[m.id].jumua}</span></div>`:'')
   +`<div class="small" style="border:0;display:block">${live?t(srcKey):t('demoTimes')}</div>`;
  const r=x=>x*Math.PI/180,K={lat:21.4225,lng:39.8262};
  const y=Math.sin(r(K.lng-pos.lng))*Math.cos(r(K.lat)),x=Math.cos(r(pos.lat))*Math.sin(r(K.lat))-Math.sin(r(pos.lat))*Math.cos(r(K.lat))*Math.cos(r(K.lng-pos.lng));
