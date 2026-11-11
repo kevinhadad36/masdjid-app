@@ -38,7 +38,36 @@ nav button.on{color:var(--brand)}
 h2{font-size:20px;line-height:26px;font-weight:700}
 .badge{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-size:12px;font-weight:700}
 .badge svg{width:14px;height:14px;fill:var(--brand)}
-#map{height:300px;border-radius:24px;margin-bottom:12px;z-index:0}
+#s-map{padding:0}
+#s-map.on{display:block;height:100%;position:relative}
+#map{position:absolute;inset:0;z-index:0;background:#e6ece9}
+.leaflet-container{font-family:inherit}
+.dark-tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+.pin{background:none;border:0}
+.pinb{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);transition:transform .15s}
+.pinb svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transform:rotate(45deg)}
+.pin.sel .pinb{transform:rotate(-45deg) scale(1.25);box-shadow:0 5px 16px rgba(0,0,0,.45)}
+.me{width:22px;height:22px;position:relative}
+.me i{position:absolute;inset:3px;border-radius:50%;background:#1B6FB5;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.me::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:rgba(27,111,181,.25);animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.2);opacity:0}}
+@media(prefers-reduced-motion:reduce){.me::before{animation:none}}
+#bottom{position:absolute;left:0;right:0;bottom:0;z-index:500;pointer-events:none;display:flex;flex-direction:column;gap:10px;padding-bottom:10px}
+#bottom>*{pointer-events:auto}
+.fab{align-self:flex-end;margin-inline-end:12px;width:48px;height:48px;border-radius:50%;border:0;background:var(--bg);color:var(--brand);box-shadow:0 2px 12px rgba(0,0,0,.3);display:grid;place-items:center;cursor:pointer}
+.fab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 2px;scrollbar-width:none}
+#cards::-webkit-scrollbar{display:none}
+.mcard{flex:none;width:min(84%,330px);scroll-snap-align:center;background:var(--bg);border-radius:24px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.28);border:2px solid transparent}
+.mcard.sel{border-color:var(--brand)}
+.mcard .acts{display:flex;gap:8px;margin-top:10px}
+.mcard .acts .btn{padding:9px 12px;font-size:14px}
+.mcard .acts a.btn{text-decoration:none;text-align:center;flex:none;width:auto}
+.mcard .more{display:flex;gap:8px;margin-top:8px}
+#routeBar{position:absolute;top:12px;left:12px;right:12px;z-index:600;background:var(--brand);color:#fff;border-radius:20px;padding:12px 16px;display:none;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#routeBar.on{display:flex}
+#routeBar b{font-size:22px;line-height:26px}
+#routeBar button{background:rgba(255,255,255,.2);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}
 .mosque{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
 .ico{width:44px;height:44px;border-radius:50%;background:var(--brand);display:grid;place-items:center;flex:none}
 .ico svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -88,8 +117,11 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 <main>
  <section class="screen on" id="s-map">
   <div id="map"></div>
-  <div class="row" style="margin-bottom:4px"><h2 class="grow" id="tNearby"></h2><button class="btn dark" id="locate"></button></div>
-  <div id="list"></div>
+  <div id="routeBar"><div class="grow"><b id="rtTime"></b><div class="small" id="rtSub" style="color:#fff;opacity:.9"></div></div><button id="rtClose" aria-label="close">×</button></div>
+  <div id="bottom">
+   <button class="fab" id="locate" aria-label="locate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8.5"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg></button>
+   <div id="cards"></div>
+  </div>
  </section>
 
  <section class="screen" id="s-prayers">
@@ -186,7 +218,7 @@ function applyLang(){
  document.documentElement.lang=lang;document.documentElement.dir=RTL.includes(lang)?'rtl':'ltr';
  $('#langBtn').textContent='🌐 '+lang.toUpperCase();
  $('#nav').innerHTML=TABS.map(k=>`<button data-t="${k}" class="${(SUB[cur]||cur)===k?'on':''}">${I[k]}<span>${t(k)}</span></button>`).join('');
- $('#locate').textContent=t('locate');$('#tNearby').textContent=t('nearby')+(dist(pos,TOULOUSE)<30?' · Toulouse':'');$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
+ $('#locate').setAttribute('aria-label',t('locate'));$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
  $('#storiesNote').textContent=t('storiesNote');$('#newRdv').textContent=t('newRdv');
  setTitle();fillPm();renderList();loadTimes();renderStories();renderRole();renderRdv();renderCurrent();
  $('#back').textContent=RTL.includes(lang)?'→':'←';
@@ -198,20 +230,54 @@ function pickLang(){
 $('#sheet').addEventListener('click',e=>{const c=e.target.closest('[data-l]');if(c){lang=c.dataset.l;store.set('lang',lang);$('#sheet').classList.remove('on');applyLang()}});
 $('#langBtn').onclick=pickLang;
 
-/* ---------- carte ---------- */
-let map;
+/* ---------- carte (style navigation) ---------- */
+let map,pins={},userMk,routeLines=[],selected=null,watchId=null;
+const isDark=()=>{const r=document.documentElement.dataset.theme;return r==='dark'||(r!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)};
+const pinIcon=(m,sel)=>L.divIcon({className:'pin'+(sel?' sel':''),html:'<div class="pinb" style="background:'+m.color+'">'+I.dome+'</div>',iconSize:[40,46],iconAnchor:[8,44]});
 function initMap(){
  if(!window.L){$('#map').innerHTML='<div class="muted" style="padding:24px">…</div>';return}
- map=L.map('map',{zoomControl:false}).setView([pos.lat,pos.lng],13);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
- MOSQUEES.forEach(m=>L.circleMarker([m.lat,m.lng],{radius:10,color:'#fff',weight:3,fillColor:'#0B8F7A',fillOpacity:1}).addTo(map).on('click',()=>openMosque(m.id)));
- L.circleMarker([pos.lat,pos.lng],{radius:7,color:'#fff',weight:3,fillColor:'#1B6FB5',fillOpacity:1}).addTo(map);
+ map=L.map('map',{zoomControl:false,attributionControl:false}).setView([pos.lat,pos.lng],12);
+ if(isDark())$('#map').classList.add('dark-tiles');
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+ L.control.attribution({prefix:false,position:'topright'}).addAttribution('© OpenStreetMap').addTo(map);
+ MOSQUEES.forEach(m=>{pins[m.id]=L.marker([m.lat,m.lng],{icon:pinIcon(m)}).addTo(map).on('click',()=>selectMosque(m.id))});
+ userMk=L.marker([pos.lat,pos.lng],{icon:L.divIcon({className:'',html:'<div class="me"><i></i></div>',iconSize:[22,22]}),interactive:false,zIndexOffset:900}).addTo(map);
+ const b=L.latLngBounds(MOSQUEES.filter(m=>dist(pos,m)<12).map(m=>[m.lat,m.lng]).concat([[pos.lat,pos.lng]]));map.fitBounds(b,{paddingTopLeft:[30,30],paddingBottomRight:[30,260]});
 }
-function renderList(){
+function renderList(){renderCards()}
+function renderCards(){
  const l=MOSQUEES.map(m=>({...m,d:dist(pos,m)})).sort((a,b)=>a.d-b.d);
- $('#list').innerHTML=l.map(m=>`<div class="mosque" data-id="${m.id}"><div class="ico">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>`).join('');
+ $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><div class="row"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>
+ <div class="acts"><button class="btn" data-act="route">${t('route')}</button><a class="btn ghost" target="_blank" rel="noopener" href="https://waze.com/ul?ll=${m.lat},${m.lng}&navigate=yes">Waze</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=driving">Maps</a></div>
+ <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="info">Infos</button></div></div>`).join('');
 }
-$('#list').onclick=e=>{const r=e.target.closest('.mosque');if(r)openMosque(+r.dataset.id)};
+$('#cards').onclick=e=>{
+ const c=e.target.closest('.mcard');if(!c)return;const id=+c.dataset.id,a=e.target.closest('[data-act]');
+ if(!a)return selectMosque(id,true);
+ if(a.dataset.act==='route')showRoute(id);else if(a.dataset.act==='cov')newRdvSheet(id);else if(a.dataset.act==='info')openMosque(id);
+};
+function selectMosque(id,fromCard){
+ selected=id;const m=mq(id);
+ for(const k in pins)pins[k].setIcon(pinIcon(mq(+k),+k===id));
+ renderCards();
+ const c=$('#cards').querySelector('[data-id="'+id+'"]');if(c&&!fromCard)c.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+ if(map)map.flyTo([m.lat,m.lng],Math.max(map.getZoom(),14),{duration:.6});
+}
+async function showRoute(id){
+ const m=mq(id);selected=id;renderCards();clearRoute();
+ const from=dist(pos,TOULOUSE)<60?pos:TOULOUSE;
+ try{
+  const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${m.lng},${m.lat}?overview=full&geometries=geojson`);
+  const j=await r.json(),rt=j.routes[0],pts=rt.geometry.coordinates.map(c=>[c[1],c[0]]);
+  routeLines=[L.polyline(pts,{color:'#fff',weight:10,opacity:.95}).addTo(map),L.polyline(pts,{color:'#0B8F7A',weight:6}).addTo(map)];
+  map.fitBounds(routeLines[1].getBounds(),{paddingTopLeft:[40,90],paddingBottomRight:[40,260]});
+  $('#rtTime').textContent=t('routeInfo',{m:Math.max(1,Math.round(rt.duration/60)),d:(rt.distance/1000).toFixed(1)});
+  $('#rtSub').textContent=m.nom+' · '+(from===pos&&hasFix?t('fromYou'):t('fromCenter'));
+  $('#routeBar').classList.add('on');
+ }catch(e){toast(t('routeFail'))}
+}
+function clearRoute(){routeLines.forEach(l=>map.removeLayer(l));routeLines=[];$('#routeBar').classList.remove('on')}
+$('#rtClose').onclick=clearRoute;
 function openMosque(id){
  const m=mq(id);
  $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
@@ -219,11 +285,19 @@ function openMosque(id){
  $('#sheet').classList.add('on');
  $('#cl').onclick=()=>$('#sheet').classList.remove('on');
  $('#cov').onclick=()=>newRdvSheet(id);
- if(map)map.panTo([m.lat,m.lng]);
+}
+let hasFix=false;
+function onFix(p,first){
+ pos={lat:p.coords.latitude,lng:p.coords.longitude};store.set('pos',pos);hasFix=true;
+ if(userMk)userMk.setLatLng([pos.lat,pos.lng]);
+ renderCards();
+ if(first){loadTimes();if(map)map.flyTo([pos.lat,pos.lng],14,{duration:.8});toast(t('posOk'))}
 }
 $('#locate').onclick=()=>{
  if(!navigator.geolocation)return toast(t('posNo'));
- navigator.geolocation.getCurrentPosition(p=>{pos={lat:p.coords.latitude,lng:p.coords.longitude};store.set('pos',pos);renderList();loadTimes();if(map)map.setView([pos.lat,pos.lng],13);toast(t('posOk'))},()=>toast(t('posNo')));
+ if(watchId!==null&&hasFix){if(map)map.flyTo([pos.lat,pos.lng],15,{duration:.6});return}
+ let first=true;
+ watchId=navigator.geolocation.watchPosition(p=>{onFix(p,first);first=false},()=>{toast(t('posNo'));watchId=null},{enableHighAccuracy:true,maximumAge:5000});
 };
 
 /* ---------- prières (par mosquée) ---------- */
