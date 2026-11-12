@@ -115,6 +115,11 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 .serie .flame{width:56px;height:56px;border-radius:50%;background:#F5B301;color:#3A2A00;display:grid;place-items:center;flex:none}
 .serie .flame svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .dots{display:flex;gap:8px;margin-top:12px}.dot{width:22px;height:22px;border-radius:50%;background:var(--line);display:block}.dot.on{background:#F5B301}
+/* --- mode plein écran des rappels vidéo --- */
+#app.immersive header{display:none}
+#app.immersive nav{background:#101418;border-top:1px solid rgba(255,255,255,.12)}
+#app.immersive nav button{color:rgba(255,255,255,.65)}#app.immersive nav button.on{color:#fff}
+#app.immersive #s-rappels.on{padding-top:env(safe-area-inset-top)}
 /* --- rappels vidéo --- */
 #s-rappels{padding:0}#s-rappels.on{display:block;height:100%;position:relative;overflow:hidden}
 #rapTabs{position:absolute;top:10px;left:0;right:0;z-index:5;display:flex;gap:8px;justify-content:center}
@@ -237,8 +242,16 @@ function go(k){
  $('#sheet').classList.remove('on');applySectionColor(tab);
  $('#back').style.display=SUB[k]?'block':'none';
  $('#back').textContent=RTL.includes(lang)?'→':'←';
- setTitle();renderCurrent();
+ setTitle();renderCurrent();setImmersive(k==='rappels');
  if(k==='map'&&map)setTimeout(()=>map.invalidateSize(),50);
+}
+function setImmersive(on){
+ $('#app').classList.toggle('immersive',on);
+ try{
+  const d=document,el=d.documentElement,fs=d.fullscreenElement||d.webkitFullscreenElement;
+  if(on&&!fs){const r=(el.requestFullscreen||el.webkitRequestFullscreen);if(r)Promise.resolve(r.call(el)).catch(()=>{})}
+  else if(!on&&fs){const x=(d.exitFullscreen||d.webkitExitFullscreen);if(x)Promise.resolve(x.call(d)).catch(()=>{})}
+ }catch(e){}
 }
 function setTitle(){$('#title').textContent=cur==='map'?t('mosques'):t(cur==='discover'?'discover':cur)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
