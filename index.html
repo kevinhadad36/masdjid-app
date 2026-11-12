@@ -107,13 +107,39 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 .step .n{width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;display:grid;place-items:center;flex:none}
 .qrbox{background:#fff;color:#16191C;border-radius:24px;padding:24px;text-align:center;border:1px solid var(--line)}
 .qrbox svg{width:220px;height:220px;display:block;margin:16px auto}
+/* correctif : la classe .me (pastille de position sur la carte) écrasait aussi les bulles « .bubble.me » */
+.bubble.me{width:fit-content;height:auto;position:static}.bubble.me::before{content:none}
+/* --- série de prières --- */
+.streak{display:inline-flex;align-items:center;gap:4px;background:#F5B301;color:#3A2A00;border:0;border-radius:1000px;padding:5px 10px;font:800 14px inherit;font-family:inherit;cursor:pointer}
+.streak svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.serie .flame{width:56px;height:56px;border-radius:50%;background:#F5B301;color:#3A2A00;display:grid;place-items:center;flex:none}
+.serie .flame svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dots{display:flex;gap:8px;margin-top:12px}.dot{width:22px;height:22px;border-radius:50%;background:var(--line);display:block}.dot.on{background:#F5B301}
+/* --- rappels vidéo --- */
+#s-rappels{padding:0}#s-rappels.on{display:block;height:100%;position:relative;overflow:hidden}
+#rapTabs{position:absolute;top:10px;left:0;right:0;z-index:5;display:flex;gap:8px;justify-content:center}
+#rapTabs .chip{background:rgba(0,0,0,.4);color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}#rapTabs .chip.on{background:#fff;color:#16191C}
+#feed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}#feed::-webkit-scrollbar{display:none}
+.clip{height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 76px 28px 16px}
+.clip.empty{align-items:center;justify-content:center;background:#101418;text-align:center;padding:24px}
+.clip .quote{font-size:24px;line-height:32px;font-weight:700;margin:6px 0}.clip .who{font-weight:700;font-size:14px}
+.demoTag,.liveBadge{position:absolute;top:56px;inset-inline-start:16px;font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.04em}
+.demoTag{background:rgba(255,255,255,.2)}.liveBadge{background:#C62839;inset-inline-start:auto;inset-inline-end:16px}
+.playBig{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:28px;cursor:pointer}
+.clip.playing .playBig{opacity:.35}
+.rail{position:absolute;inset-inline-end:10px;bottom:44px;display:flex;flex-direction:column;gap:14px;align-items:center}
+.railBtn{background:rgba(0,0,0,.35);border:0;color:#fff;width:50px;min-height:50px;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 12px inherit;font-family:inherit;cursor:pointer}
+.railBtn svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.railBtn.on svg{fill:#FF4D6A;stroke:#FF4D6A}
+.prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25)}.prog i{display:block;height:100%;width:0;background:#fff}
+#streakBtn[hidden]{display:none}
 #printArea{display:none}
 @media print{#app{display:none!important}#printArea{display:block!important;text-align:center;font-family:sans-serif;padding:40px;color:#000}#printArea svg{width:340px;height:340px}}
 </style>
 </head>
 <body>
 <div id="app">
-<header><button id="back" aria-label="back">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="langBtn"></button></header>
+<header><button id="back" aria-label="back">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="streakBtn" class="streak"></button><button id="langBtn"></button></header>
 <main>
  <section class="screen on" id="s-map">
   <div id="map"></div>
@@ -128,6 +154,7 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
   <select id="pm" aria-label="mosque"></select>
   <div class="next"><div class="small" id="tNext" style="color:#fff;opacity:.85"></div><div class="big" id="nextName">–</div><div id="nextIn" style="font-weight:600">–</div></div>
   <div class="card times" id="times"></div>
+  <div id="serieBox"></div>
   <div class="card row">
    <svg id="needle" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="2"/><path d="M32 6 40 34H24Z" fill="var(--brand)"/><path d="M32 58 24 34H40Z" fill="currentColor" fill-opacity=".25"/></svg>
    <div class="grow"><h2 id="tQibla"></h2><div class="muted" id="qibla">–</div></div>
@@ -141,11 +168,15 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
  </section>
 
  <section class="screen" id="s-rdv">
+  <div id="genderBox"></div>
   <button class="btn" id="newRdv"></button>
   <div style="height:16px"></div>
   <div id="rdvList"></div>
  </section>
 
+ <section class="screen" id="s-rappels"><div id="rapTabs"></div><div id="feed"></div></section>
+ <section class="screen" id="s-cours"><div id="coursBody"></div></section>
+ <section class="screen" id="s-account"><div id="accountBody"></div></section>
  <section class="screen" id="s-more"><div id="moreBody"></div></section>
  <section class="screen" id="s-family"><div id="familyBody"></div></section>
  <section class="screen" id="s-discover"><div id="discoverBody"></div></section>
@@ -162,7 +193,9 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="i18n.js"></script>
+<script src="extra-i18n.js"></script>
 <script src="mosques.js"></script>
+<script src="features.js"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -180,10 +213,11 @@ const I={
  book:'<svg viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6M20 4v14h-6"/></svg>',
  qr:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7h-3"/></svg>',
  gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+ rappels:ICON_RAP,user:ICON_USER,
  check:'<svg viewBox="0 0 24 24"><path d="M12 1l3 2 3.5-.2 1.2 3.3 3 1.9-1.2 3.3 1.2 3.3-3 1.9-1.2 3.3L15 21l-3 2-3-2-3.5.2-1.2-3.3-3-1.9 1.2-3.3L.3 8.9l3-1.9L4.5 3.8 8 4z"/><path d="M8 12l3 3 5-6" stroke="#fff" fill="none" stroke-width="2"/></svg>'
 };
-const TABS=['map','prayers','stories','rdv','more'];
-const SUB={family:'more',discover:'more',qr:'more',settings:'more'};
+const TABS=['map','prayers','rappels','stories','rdv','more'];
+const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more'};
 let cur='map';
 const toast=m=>{const x=$('#toast');x.textContent=m;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2000)};
 
@@ -200,7 +234,7 @@ function go(k){
  cur=k;const tab=SUB[k]||k;
  $$('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+k));
  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
- $('#sheet').classList.remove('on');
+ $('#sheet').classList.remove('on');applySectionColor(tab);
  $('#back').style.display=SUB[k]?'block':'none';
  $('#back').textContent=RTL.includes(lang)?'→':'←';
  setTitle();renderCurrent();
@@ -210,7 +244,7 @@ function setTitle(){$('#title').textContent=cur==='map'?t('mosques'):t(cur==='di
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
 $('#back').onclick=()=>go('more');
 function renderCurrent(){
- ({rdv:renderRdv,more:renderMore,family:renderFamily,discover:renderDiscover,qr:renderQr,settings:renderSettings}[cur]||(()=>{}))();
+ ({cours:renderCours,prayers:renderSerie,rappels:renderRappels,account:renderAccount,rdv:renderRdv,more:renderMore,family:renderFamily,discover:renderDiscover,qr:renderQr,settings:renderSettings}[cur]||(()=>{}))();
 }
 
 /* ---------- langue ---------- */
@@ -220,7 +254,7 @@ function applyLang(){
  $('#nav').innerHTML=TABS.map(k=>`<button data-t="${k}" class="${(SUB[cur]||cur)===k?'on':''}">${I[k]}<span>${t(k)}</span></button>`).join('');
  $('#locate').setAttribute('aria-label',t('locate'));$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
  $('#storiesNote').textContent=t('storiesNote');$('#newRdv').textContent=t('newRdv');
- setTitle();fillPm();renderList();loadTimes();renderStories();renderRole();renderRdv();renderCurrent();
+ setTitle();fillPm();renderList();loadTimes();renderStories();renderRole();renderRdv();renderCurrent();renderStreakBadge();
  $('#back').textContent=RTL.includes(lang)?'→':'←';
 }
 function pickLang(){
@@ -372,31 +406,42 @@ function playStory(id,i=0){
 function closeStory(){clearTimeout(tm);$('#viewer').classList.remove('on');renderStories()}
 
 /* ---------- rendez-vous / covoiturage (messages prédéfinis uniquement, toutes les prières) ---------- */
-let rdvs=store.get('rdvs',[]).filter(r=>r&&mq(r.m)&&r.p&&Array.isArray(r.msgs));
+let rdvs=store.get('rdvs',[]).filter(r=>r&&mq(r.m)&&r.p&&r.g&&Array.isArray(r.msgs));
 const PRESETS=['p0','p1','p2','p3','p4','p5'];
-function newRdvSheet(preMosque){
- $('#sheet').innerHTML=`<h2>${t('newRdv')}</h2>
- <label>${t('lMosque')}</label><select id="rm">${MOSQUEES.map(m=>`<option value="${m.id}" ${m.id===preMosque?'selected':''}>${esc(m.nom)}</option>`).join('')}</select>
- <label>${t('lPrayer')}</label><select id="rp">${PRAYERS.map(p=>`<option value="${p}">${t(p)}</option>`).join('')}</select>
+function newRdvSheet(preMosque,preTarget){
+ const g=getGender();
+ if(!g){ // le genre est nécessaire : trajets séparés frères / sœurs
+  $('#sheet').innerHTML=`<h2>${t('newRdv')}</h2><p class="muted" style="margin:8px 0 12px">${t('pickGender')}</p>${genderChips()}<button class="btn ghost" id="rcl">${t('cancel')}</button>`;
+  $('#sheet').classList.add('on');$('#rcl').onclick=()=>$('#sheet').classList.remove('on');return}
+ const mosques=MOSQUEES.concat(allCours().some(c=>c.m===99)?[DEMO]:[]);
+ const first=preMosque||mosques[0].id;
+ $('#sheet').innerHTML=`<h2>${t('newRdv')}</h2><p class="small" style="margin-bottom:8px">${g==='sister'?t('womenOnly'):t('menOnly')}</p>
+ <label>${t('lMosque')}</label><select id="rm">${mosques.map(m=>`<option value="${m.id}" ${m.id===first?'selected':''}>${esc(m.nom)}</option>`).join('')}</select>
+ <label>${t('forWhat')}</label><select id="rp"></select>
  <div class="chips" style="margin:0 0 16px"><button class="chip on" data-r="offer">${t('offer')}</button><button class="chip" data-r="seek">${t('seek')}</button></div>
  <button class="btn" id="rok">${t('create')}</button><div style="height:8px"></div><button class="btn ghost" id="rcl">${t('cancel')}</button>`;
+ const fillTargets=sel=>{$('#rp').innerHTML=rdvTargets(+$('#rm').value,g).map(o=>`<option value="${o.v}" ${o.v===sel?'selected':''}>${esc(o.label)}</option>`).join('')};
+ fillTargets(preTarget);$('#rm').onchange=()=>fillTargets();
  $('#sheet').classList.add('on');
  let kind='offer';
  $$('[data-r]').forEach(b=>b.onclick=()=>{kind=b.dataset.r;$$('[data-r]').forEach(x=>x.classList.toggle('on',x===b))});
  $('#rcl').onclick=()=>$('#sheet').classList.remove('on');
- $('#rok').onclick=()=>{rdvs.unshift({id:Date.now(),m:+$('#rm').value,p:$('#rp').value,kind,msgs:[{from:'other',k:'leave'}]});store.set('rdvs',rdvs);$('#sheet').classList.remove('on');go('rdv');toast(t('created'))};
+ $('#rok').onclick=()=>{rdvs.unshift({id:Date.now(),m:+$('#rm').value,p:$('#rp').value,g,kind,msgs:[{from:'other',k:'leave'}]});store.set('rdvs',rdvs);$('#sheet').classList.remove('on');go('rdv');toast(t('created'))};
 }
 $('#newRdv').onclick=()=>newRdvSheet();
 function renderRdv(){
- $('#rdvList').innerHTML=rdvs.length?rdvs.map(r=>`<div class="card" data-id="${r.id}"><div class="row"><div class="ico">${I.rdv}</div><div class="grow"><b>${esc(mq(r.m).nom)}</b><div class="small">${t(r.p)} · ${t(r.kind)}</div></div></div>
- <div style="margin-top:8px">${r.msgs.map(m=>`<div class="bubble ${m.from}">${t(m.k)}</div>`).join('')}</div>
- <div class="chips">${PRESETS.map(p=>`<button class="chip" data-p="${p}">${t(p)}</button>`).join('')}</div></div>`).join(''):`<p class="muted" style="text-align:center;margin-top:32px">${t('noRdv')}</p>`;
+ const g=getGender(),list=g?rdvs.filter(r=>r.g===g):[]; // frères et sœurs ne voient que leurs propres trajets
+ $('#genderBox').innerHTML=genderBarHtml();$('#newRdv').style.display=g?'':'none';
+ $('#rdvList').innerHTML=list.length?list.map(r=>`<div class="card" data-id="${r.id}"><div class="row"><div class="ico">${I.rdv}</div><div class="grow"><b>${esc(mq(r.m).nom)}</b><div class="small">${esc(rdvTargetLabel(r.p))} · ${t(r.kind)}</div></div></div>
+ <div style="margin-top:8px">${r.msgs.map(m=>`<div class="bubble ${m.from}">${m.place?t(m.k,{place:t('pl_'+m.place)}):t(m.k)}</div>`).join('')}</div>
+ <div class="chips">${PRESETS.map(p=>`<button class="chip" data-p="${p}">${t(p)}</button>`).join('')}</div>
+ <div class="small" style="margin-top:10px">${t('meetHint')}</div><div class="chips" style="margin-top:6px">${MEET_PLACES.map(pl=>`<button class="chip" data-p="meet" data-place="${pl}">${t('meet',{place:t('pl_'+pl)})}</button>`).join('')}</div></div>`).join(''):(g?`<p class="muted" style="text-align:center;margin-top:32px">${t('noRdv')}</p>`:'');
 }
-$('#rdvList').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;const r=rdvs.find(x=>x.id===+c.closest('.card').dataset.id);r.msgs.push({from:'me',k:c.dataset.p});store.set('rdvs',rdvs);renderRdv()};
+$('#rdvList').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;const r=rdvs.find(x=>x.id===+c.closest('.card').dataset.id);const msg={from:'me',k:c.dataset.p};if(c.dataset.place&&MEET_PLACES.includes(c.dataset.place))msg.place=c.dataset.place;r.msgs.push(msg);store.set('rdvs',rdvs);renderRdv()};
 
 /* ---------- Plus ---------- */
 function renderMore(){
- const items=[['family','family','familyD'],['discover','book','discoverD'],['qr','qr','qrD'],['settings','gear',null]];
+ const items=[['account','user','accountD'],['cours','book','coursD'],['family','family','familyD'],['discover','book','discoverD'],['qr','qr','qrD'],['settings','gear',null]];
  $('#moreBody').innerHTML=items.map(([k,ic,d])=>`<button class="menu" data-go="${k}"><div class="ico">${I[ic]}</div><div class="grow"><b>${t(k)}</b>${d?`<div class="small">${t(d)}</div>`:''}</div></button>`).join('');
 }
 $('#moreBody').onclick=e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)};
@@ -421,8 +466,8 @@ $('#familyBody').onclick=e=>{
 
 /* ---------- Découvrir l'islam ---------- */
 function renderDiscover(){
- $('#discoverBody').innerHTML=[1,2,3,4].map(n=>`<div class="card step"><div class="n">${n}</div><div><b>${t('d'+n+'t')}</b><p class="muted">${t('d'+n)}</p></div></div>`).join('')+`<button class="btn" id="talk">${t('talk')}</button>`;
- $('#talk').onclick=()=>toast(t('talkDone'));
+ // « poser une question à un frère » retiré pour l'instant (étape 4 + bouton) ; à reprendre plus tard
+ $('#discoverBody').innerHTML=[1,2,3].map(n=>`<div class="card step"><div class="n">${n}</div><div><b>${t('d'+n+'t')}</b><p class="muted">${t('d'+n)}</p></div></div>`).join('');
 }
 
 /* ---------- QR code mosquée ---------- */
@@ -452,7 +497,8 @@ function renderSettings(){
 setInterval(()=>{spent++;store.set('spent',spent);const e=$('#spent');if(e)e.textContent=Math.floor(spent/60)+' min'},1000);
 
 /* ---------- démarrage ---------- */
-initMap();applyLang();loadTimes();setInterval(prieres,30000);
+$('#streakBtn').onclick=()=>go('prayers');
+initRappels();initGender();initCours();initMap();applySectionColor('map');applyLang();renderStreakBadge();loadTimes();setInterval(prieres,30000);
 </script>
 </body>
 </html>
