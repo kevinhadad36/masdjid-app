@@ -512,6 +512,7 @@ setInterval(()=>{spent++;store.set('spent',spent);const e=$('#spent');if(e)e.tex
 /* ---------- démarrage ---------- */
 $('#streakBtn').onclick=()=>go('prayers');
 initRappels();initGender();initCours();initMap();applySectionColor('map');applyLang();renderStreakBadge();loadTimes();setInterval(prieres,30000);
+go('rappels'); // ouverture directement sur les vidéos (comme TikTok)
 </script>
 </body>
 </html>
