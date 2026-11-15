@@ -142,12 +142,13 @@ function renderAccount(){
  const a=getAccount(),body=$('#accountBody');if(!body)return;
  if(a){
   body.innerHTML=`<div class="card row"><div class="ico" style="width:56px;height:56px">${ICON_USER}</div><div class="grow"><h2>${t('acHello')}</h2><div class="muted" dir="ltr">${esc(maskContact(a))}</div></div></div>
+  ${profileHtml()}${prayerPrefsHtml()}
   <button class="btn ghost" id="acOut">${t('acOut')}</button><p class="small" style="margin-top:12px">${t('acNote')}</p>`;
-  $('#acOut').onclick=()=>{_acc=null;store.set('account',null);renderAccount()};return;
+  $('#acOut').onclick=()=>{_acc=null;store.set('account',null);renderAccount()};bindProfile();return;
  }
  body.innerHTML=`<label>${t('acKind')}</label><div class="chips" style="margin:6px 0 12px"><button class="chip ${acKind==='email'?'on':''}" data-ak="email">${t('acEmail')}</button><button class="chip ${acKind==='phone'?'on':''}" data-ak="phone">${t('acPhone')}</button></div>
  <input class="field" id="acVal" dir="ltr" autocomplete="${acKind==='email'?'email':'tel'}" inputmode="${acKind==='email'?'email':'tel'}" placeholder="${esc(t('acPh_'+acKind))}">
- <button class="btn" id="acOk">${t('acCreate')}</button><p class="small" style="margin-top:12px">${t('acNote')}</p>`;
+ <button class="btn" id="acOk">${t('acCreate')}</button><p class="small" style="margin-top:12px">${t('acNext')}</p><p class="small" style="margin-top:8px">${t('acNote')}</p>`;
  body.querySelectorAll('[data-ak]').forEach(b=>b.onclick=()=>{acKind=b.dataset.ak;renderAccount()});
  $('#acOk').onclick=()=>{
   const v=$('#acVal').value.trim();

@@ -139,6 +139,37 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 .prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25)}.prog i{display:block;height:100%;width:0;background:#fff}
 #streakBtn[hidden]{display:none}
 #printArea{display:none}
+/* --- profil : emoji sans visage + position (style Snap / Waze) --- */
+.emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:6px 0 12px}
+.emojis .emo{width:48px;height:48px;font-size:24px}.emo.on{outline:3px solid var(--brand);background:var(--bg)}
+.emk{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--brand);display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.3);flex:none}
+.emk.big{width:56px;height:56px;font-size:30px}
+.emkName{position:absolute;top:46px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font:700 11px/14px inherit;font-family:inherit;padding:2px 8px;border-radius:8px;white-space:nowrap}
+/* --- trajets --- */
+.seg{display:flex;background:var(--field);border-radius:1000px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;border-radius:1000px;padding:8px 4px;font:700 14px inherit;font-family:inherit;color:var(--tx2);cursor:pointer}
+.seg button.on{background:var(--brand);color:#fff}
+h2.sec{font-size:18px;margin:16px 0 8px}
+.trip{border-inline-start:6px solid var(--brand)}.trip.seek{border-inline-start-color:#F5B301}
+.tag{align-self:flex-start;font-size:11px;font-weight:800;border-radius:8px;padding:2px 8px;background:var(--brand);color:#fff;white-space:nowrap}
+.tag.seek,.tag.pending{background:#F5B301;color:#3A2A00}.tag.pending{display:inline-block;margin-top:8px}
+.btn.sm{padding:9px 14px;font-size:14px;flex:1}
+.recap>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.recap>div:last-child{border:0}.recap span{color:var(--tx2)}.recap b{text-align:end}
+/* --- page mosquée (QR code) --- */
+.mhero{border-radius:24px;padding:20px;color:#fff;margin-bottom:12px}.mhero h2{margin-top:10px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mtile{background:var(--field);border:0;border-radius:20px;padding:14px;text-align:start;font-family:inherit;color:var(--tx);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.mtile span{font-size:28px;line-height:34px}
+.addMq{display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:8px}
+/* --- bandeau avant la prière (sur les vidéos) --- */
+.pbar{position:absolute;top:10px;left:10px;right:10px;z-index:8;display:none;align-items:center;gap:10px;background:#FFD43B;color:#2A2000;border-radius:18px;padding:12px 12px 12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-size:14px;line-height:18px;font-weight:600}
+.pbar.on{display:flex;animation:pbIn .35s ease-out}
+.pbar b{display:block;font-size:16px;line-height:20px;font-weight:800}
+.pbIco{font-size:28px;line-height:1}
+.pbar button{border:0;border-radius:1000px;background:#2A2000;color:#FFD43B;font:800 13px inherit;font-family:inherit;padding:9px 12px;cursor:pointer;white-space:nowrap}
+#prayBanner.on~#rapTabs{top:96px}
+@keyframes pbIn{from{transform:translateY(-120%)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.pbar.on{animation:none}}
 @media print{#app{display:none!important}#printArea{display:block!important;text-align:center;font-family:sans-serif;padding:40px;color:#000}#printArea svg{width:340px;height:340px}}
 </style>
 </head>
@@ -179,7 +210,7 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
   <div id="rdvList"></div>
  </section>
 
- <section class="screen" id="s-rappels"><div id="rapTabs"></div><div id="feed"></div></section>
+ <section class="screen" id="s-rappels"><div id="prayBanner" class="pbar" role="status" aria-live="polite"></div><div id="rapTabs"></div><div id="feed"></div></section>
  <section class="screen" id="s-cours"><div id="coursBody"></div></section>
  <section class="screen" id="s-account"><div id="accountBody"></div></section>
  <section class="screen" id="s-more"><div id="moreBody"></div></section>
@@ -187,6 +218,8 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
  <section class="screen" id="s-discover"><div id="discoverBody"></div></section>
  <section class="screen" id="s-qr"><div id="qrBody"></div></section>
  <section class="screen" id="s-settings"><div id="settingsBody"></div></section>
+ <section class="screen" id="s-join"><div id="joinBody"></div></section>
+ <section class="screen" id="s-mosque"><div id="mosqueBody"></div></section>
 </main>
 <nav id="nav"></nav>
 <div class="sheet" id="sheet"></div>
@@ -201,6 +234,7 @@ label{font-size:14px;font-weight:600;color:var(--tx2)}
 <script src="extra-i18n.js"></script>
 <script src="mosques.js"></script>
 <script src="features.js"></script>
+<script src="features2.js"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -222,7 +256,7 @@ const I={
  check:'<svg viewBox="0 0 24 24"><path d="M12 1l3 2 3.5-.2 1.2 3.3 3 1.9-1.2 3.3 1.2 3.3-3 1.9-1.2 3.3L15 21l-3 2-3-2-3.5.2-1.2-3.3-3-1.9 1.2-3.3L.3 8.9l3-1.9L4.5 3.8 8 4z"/><path d="M8 12l3 3 5-6" stroke="#fff" fill="none" stroke-width="2"/></svg>'
 };
 const TABS=['map','prayers','rappels','stories','rdv','more'];
-const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more'};
+const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more',join:'more',mosque:'map'};
 let cur='map';
 const toast=m=>{const x=$('#toast');x.textContent=m;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2000)};
 
@@ -253,11 +287,11 @@ function setImmersive(on){
   else if(!on&&fs){const x=(d.exitFullscreen||d.webkitExitFullscreen);if(x)Promise.resolve(x.call(d)).catch(()=>{})}
  }catch(e){}
 }
-function setTitle(){$('#title').textContent=cur==='map'?t('mosques'):t(cur==='discover'?'discover':cur)}
+function setTitle(){$('#title').textContent=cur==='map'?t('mosques'):cur==='mosque'?t('mosquePage'):t(cur==='discover'?'discover':cur)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
-$('#back').onclick=()=>go('more');
+$('#back').onclick=()=>go(SUB[cur]==='map'?'map':'more');
 function renderCurrent(){
- ({cours:renderCours,prayers:renderSerie,rappels:renderRappels,account:renderAccount,rdv:renderRdv,more:renderMore,family:renderFamily,discover:renderDiscover,qr:renderQr,settings:renderSettings}[cur]||(()=>{}))();
+ ({cours:renderCours,prayers:renderSerie,rappels:renderRappels,account:renderAccount,rdv:renderRdv,more:renderMore,family:renderFamily,discover:renderDiscover,qr:renderQr,settings:renderSettings,join:renderJoin,mosque:renderMosquePage}[cur]||(()=>{}))();
 }
 
 /* ---------- langue ---------- */
@@ -288,7 +322,7 @@ function initMap(){
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
  L.control.attribution({prefix:false,position:'topright'}).addAttribution('© OpenStreetMap').addTo(map);
  MOSQUEES.forEach(m=>{pins[m.id]=L.marker([m.lat,m.lng],{icon:pinIcon(m)}).addTo(map).on('click',()=>selectMosque(m.id))});
- userMk=L.marker([pos.lat,pos.lng],{icon:L.divIcon({className:'',html:'<div class="me"><i></i></div>',iconSize:[22,22]}),interactive:false,zIndexOffset:900}).addTo(map);
+ userMk=L.marker([pos.lat,pos.lng],{icon:meIcon(),interactive:false,zIndexOffset:900}).addTo(map);
  const b=L.latLngBounds(MOSQUEES.filter(m=>dist(pos,m)<12).map(m=>[m.lat,m.lng]).concat([[pos.lat,pos.lng]]));map.fitBounds(b,{paddingTopLeft:[30,30],paddingBottomRight:[30,260]});
 }
 function renderList(){renderCards()}
@@ -296,12 +330,14 @@ function renderCards(){
  const l=MOSQUEES.map(m=>({...m,d:dist(pos,m)})).sort((a,b)=>a.d-b.d);
  $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><div class="row"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>
  <div class="acts"><button class="btn" data-act="route">${t('route')}</button><a class="btn ghost" target="_blank" rel="noopener" href="https://waze.com/ul?ll=${m.lat},${m.lng}&navigate=yes">Waze</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=driving">Maps</a></div>
- <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="info">Infos</button></div></div>`).join('');
+ <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="page">${t('pageShort')}</button><button class="chip" data-act="info">Infos</button></div></div>`).join('')+`<div class="mcard addMq"><b>${t('notListed')}</b><button class="btn" data-act="join">${t('joinBtn')}</button></div>`;
 }
 $('#cards').onclick=e=>{
  const c=e.target.closest('.mcard');if(!c)return;const id=+c.dataset.id,a=e.target.closest('[data-act]');
+ if(a&&a.dataset.act==='join')return go('join');
+ if(!c.dataset.id)return;
  if(!a)return selectMosque(id,true);
- if(a.dataset.act==='route')showRoute(id);else if(a.dataset.act==='cov')newRdvSheet(id);else if(a.dataset.act==='info')openMosque(id);
+ if(a.dataset.act==='route')showRoute(id);else if(a.dataset.act==='cov')newRdvSheet(id);else if(a.dataset.act==='info')openMosque(id);else if(a.dataset.act==='page')openMosquePage(id);
 };
 function selectMosque(id,fromCard){
  selected=id;const m=mq(id);
@@ -328,10 +364,11 @@ $('#rtClose').onclick=clearRoute;
 function openMosque(id){
  const m=mq(id);
  $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}${MAWAQIT[m.id]?`<p style="margin-bottom:4px"><a href="https://mawaqit.net/en/m/${MAWAQIT[m.id].slug}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">Mawaqit</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
- <button class="btn" id="cov">${t('carpool')}</button><div style="height:8px"></div><button class="btn ghost" id="cl">${t('close')}</button>`;
+ <button class="btn" id="cov">${t('carpool')}</button><div style="height:8px"></div><button class="btn ghost" id="mpg">${t('mosquePage')}</button><div style="height:8px"></div><button class="btn ghost" id="cl">${t('close')}</button>`;
  $('#sheet').classList.add('on');
  $('#cl').onclick=()=>$('#sheet').classList.remove('on');
  $('#cov').onclick=()=>newRdvSheet(id);
+ $('#mpg').onclick=()=>openMosquePage(id);
 }
 let hasFix=false;
 function onFix(p,first){
@@ -421,40 +458,13 @@ function closeStory(){clearTimeout(tm);$('#viewer').classList.remove('on');rende
 /* ---------- rendez-vous / covoiturage (messages prédéfinis uniquement, toutes les prières) ---------- */
 let rdvs=store.get('rdvs',[]).filter(r=>r&&mq(r.m)&&r.p&&r.g&&Array.isArray(r.msgs));
 const PRESETS=['p0','p1','p2','p3','p4','p5'];
-function newRdvSheet(preMosque,preTarget){
- const g=getGender();
- if(!g){ // le genre est nécessaire : trajets séparés frères / sœurs
-  $('#sheet').innerHTML=`<h2>${t('newRdv')}</h2><p class="muted" style="margin:8px 0 12px">${t('pickGender')}</p>${genderChips()}<button class="btn ghost" id="rcl">${t('cancel')}</button>`;
-  $('#sheet').classList.add('on');$('#rcl').onclick=()=>$('#sheet').classList.remove('on');return}
- const mosques=MOSQUEES.concat(allCours().some(c=>c.m===99)?[DEMO]:[]);
- const first=preMosque||mosques[0].id;
- $('#sheet').innerHTML=`<h2>${t('newRdv')}</h2><p class="small" style="margin-bottom:8px">${g==='sister'?t('womenOnly'):t('menOnly')}</p>
- <label>${t('lMosque')}</label><select id="rm">${mosques.map(m=>`<option value="${m.id}" ${m.id===first?'selected':''}>${esc(m.nom)}</option>`).join('')}</select>
- <label>${t('forWhat')}</label><select id="rp"></select>
- <div class="chips" style="margin:0 0 16px"><button class="chip on" data-r="offer">${t('offer')}</button><button class="chip" data-r="seek">${t('seek')}</button></div>
- <button class="btn" id="rok">${t('create')}</button><div style="height:8px"></div><button class="btn ghost" id="rcl">${t('cancel')}</button>`;
- const fillTargets=sel=>{$('#rp').innerHTML=rdvTargets(+$('#rm').value,g).map(o=>`<option value="${o.v}" ${o.v===sel?'selected':''}>${esc(o.label)}</option>`).join('')};
- fillTargets(preTarget);$('#rm').onchange=()=>fillTargets();
- $('#sheet').classList.add('on');
- let kind='offer';
- $$('[data-r]').forEach(b=>b.onclick=()=>{kind=b.dataset.r;$$('[data-r]').forEach(x=>x.classList.toggle('on',x===b))});
- $('#rcl').onclick=()=>$('#sheet').classList.remove('on');
- $('#rok').onclick=()=>{rdvs.unshift({id:Date.now(),m:+$('#rm').value,p:$('#rp').value,g,kind,msgs:[{from:'other',k:'leave'}]});store.set('rdvs',rdvs);$('#sheet').classList.remove('on');go('rdv');toast(t('created'))};
-}
+function newRdvSheet(preMosque,preTarget){return newTripSheet(preMosque,preTarget)} // formulaire « proposer / chercher » + validation : features2.js
 $('#newRdv').onclick=()=>newRdvSheet();
-function renderRdv(){
- const g=getGender(),list=g?rdvs.filter(r=>r.g===g):[]; // frères et sœurs ne voient que leurs propres trajets
- $('#genderBox').innerHTML=genderBarHtml();$('#newRdv').style.display=g?'':'none';
- $('#rdvList').innerHTML=list.length?list.map(r=>`<div class="card" data-id="${r.id}"><div class="row"><div class="ico">${I.rdv}</div><div class="grow"><b>${esc(mq(r.m).nom)}</b><div class="small">${esc(rdvTargetLabel(r.p))} · ${t(r.kind)}</div></div></div>
- <div style="margin-top:8px">${r.msgs.map(m=>`<div class="bubble ${m.from}">${m.place?t(m.k,{place:t('pl_'+m.place)}):t(m.k)}</div>`).join('')}</div>
- <div class="chips">${PRESETS.map(p=>`<button class="chip" data-p="${p}">${t(p)}</button>`).join('')}</div>
- <div class="small" style="margin-top:10px">${t('meetHint')}</div><div class="chips" style="margin-top:6px">${MEET_PLACES.map(pl=>`<button class="chip" data-p="meet" data-place="${pl}">${t('meet',{place:t('pl_'+pl)})}</button>`).join('')}</div></div>`).join(''):(g?`<p class="muted" style="text-align:center;margin-top:32px">${t('noRdv')}</p>`:'');
-}
-$('#rdvList').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;const r=rdvs.find(x=>x.id===+c.closest('.card').dataset.id);const msg={from:'me',k:c.dataset.p};if(c.dataset.place&&MEET_PLACES.includes(c.dataset.place))msg.place=c.dataset.place;r.msgs.push(msg);store.set('rdvs',rdvs);renderRdv()};
+// affichage du covoiturage (tableau des trajets, mes trajets, messages) : renderRdv() dans features2.js
 
 /* ---------- Plus ---------- */
 function renderMore(){
- const items=[['account','user','accountD'],['cours','book','coursD'],['family','family','familyD'],['discover','book','discoverD'],['qr','qr','qrD'],['settings','gear',null]];
+ const items=[['account','user','accountD'],['cours','book','coursD'],['family','family','familyD'],['discover','book','discoverD'],['qr','qr','qrD'],['join','dome','joinD'],['settings','gear',null]];
  $('#moreBody').innerHTML=items.map(([k,ic,d])=>`<button class="menu" data-go="${k}"><div class="ico">${I[ic]}</div><div class="grow"><b>${t(k)}</b>${d?`<div class="small">${t(d)}</div>`:''}</div></button>`).join('');
 }
 $('#moreBody').onclick=e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)};
@@ -485,13 +495,14 @@ function renderDiscover(){
 
 /* ---------- QR code mosquée ---------- */
 let qrMosque=1;
-function qrSvg(){const q=qrcode(0,'M');q.addData(location.href.split('#')[0]);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
-function poster(m,fn){return `<div ${fn||''}><div class="small" style="color:#555">${t('qrTitle')}</div><h2 style="font-size:26px;margin-top:6px">${esc(m.nom)}</h2>${window.qrcode?qrSvg():''}<b>${t('qrScan')}</b></div>`}
+function qrSvg(){const q=qrcode(0,'M');q.addData(mosqueUrl(qrMosque));q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
+function poster(m,fn){return `<div ${fn||''}><div class="small" style="color:#555">${t('qrTitle2')}</div><h2 style="font-size:26px;margin-top:6px">${esc(m.nom)}</h2>${window.qrcode?qrSvg():''}<b>${t('qrScan2')}</b></div>`}
 function renderQr(){
  const m=mq(qrMosque);
- $('#qrBody').innerHTML=`<label>${t('lMosque')}</label><select id="qm">${MOSQUEES.map(x=>`<option value="${x.id}" ${x.id===qrMosque?'selected':''}>${esc(x.nom)}</option>`).join('')}</select><div class="qrbox">${poster(m)}</div><div style="height:12px"></div><button class="btn" id="qp">${t('qrPrint')}</button>`;
+ $('#qrBody').innerHTML=`<label>${t('lMosque')}</label><select id="qm">${MOSQUEES.map(x=>`<option value="${x.id}" ${x.id===qrMosque?'selected':''}>${esc(x.nom)}</option>`).join('')}</select><div class="qrbox">${poster(m)}</div><p class="small" style="margin-top:8px" dir="ltr">${esc(mosqueUrl(qrMosque))}</p><div style="height:12px"></div><button class="btn" id="qp">${t('qrPrint')}</button><div style="height:8px"></div><button class="btn ghost" id="qo">${t('mosquePage')}</button>`;
  $('#qm').onchange=e=>{qrMosque=+e.target.value;renderQr()};
  $('#qp').onclick=()=>{$('#printArea').innerHTML=poster(m);window.print()};
+ $('#qo').onclick=()=>openMosquePage(qrMosque);
 }
 
 /* ---------- Réglages ---------- */
@@ -512,7 +523,10 @@ setInterval(()=>{spent++;store.set('spent',spent);const e=$('#spent');if(e)e.tex
 /* ---------- démarrage ---------- */
 $('#streakBtn').onclick=()=>go('prayers');
 initRappels();initGender();initCours();initMap();applySectionColor('map');applyLang();renderStreakBadge();loadTimes();setInterval(prieres,30000);
+initFeatures2();
 go('rappels'); // ouverture directement sur les vidéos (comme TikTok)
+readHash(); // QR code d'une mosquée : #mosquee=<id> ouvre sa page
+checkPrayerTime();
 </script>
 </body>
 </html>
