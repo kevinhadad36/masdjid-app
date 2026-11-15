@@ -4,178 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B8F7A">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Masdjid</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#fff;--tx:#16191C;--tx2:#53575B;--tx3:#656D78;--brand:#0B8F7A;--brand-d:#08705F;--dark:#121212;--field:#EEF0F2;--line:#E4E7EA}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121416;--tx:#F2F4F5;--tx2:#B5BBC0;--tx3:#8A9199;--field:#23272B;--line:#2C3135;--brand:#18B59D;--brand-d:#139A85}}
-*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:"Nunito Sans",system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:24px;font-weight:500;display:flex;justify-content:center}
-#app{width:100%;max-width:480px;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
-header{padding:14px 16px 8px;display:flex;align-items:center;gap:8px}
-header h1{font-size:28px;line-height:34px;font-weight:700;flex:1}
-#back{background:var(--field);border:0;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--tx);display:none}
-#langBtn{background:var(--field);border:0;border-radius:1000px;padding:6px 12px;font:700 13px inherit;font-family:inherit;color:var(--tx);cursor:pointer}
-main{flex:1;overflow-y:auto;position:relative}
-.screen{display:none;padding:0 16px 16px}.screen.on{display:block}
-nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border:0;padding:8px 0 6px;color:var(--tx3);font:600 12px/14px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-nav button svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-nav button.on{color:var(--brand)}
-.btn{border:0;border-radius:1000px;padding:12px 20px;font:700 16px inherit;font-family:inherit;cursor:pointer;background:var(--brand);color:#fff;width:100%}
-.btn:active{background:var(--brand-d)}
-.btn.dark{background:var(--dark);color:#fff;font-weight:500;font-size:14px;padding:8px 16px;width:auto}
-.btn.ghost{background:var(--field);color:var(--tx)}
-.chip{border:0;border-radius:1000px;background:var(--field);color:var(--tx);padding:10px 16px;font:600 14px inherit;font-family:inherit;cursor:pointer}
-.chip:active,.chip.on{background:var(--brand);color:#fff}
-.emo{font-size:28px;background:var(--field);border:0;border-radius:50%;width:52px;height:52px;cursor:pointer}
-.muted{color:var(--tx2)}.small{font-size:12px;line-height:14px;color:var(--tx3);font-weight:600}
-.card{background:var(--field);border-radius:24px;padding:16px;margin-bottom:12px}
-.row{display:flex;align-items:center;gap:12px}
-.grow{flex:1;min-width:0}
-h2{font-size:20px;line-height:26px;font-weight:700}
-.badge{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-size:12px;font-weight:700}
-.badge svg{width:14px;height:14px;fill:var(--brand)}
-#s-map{padding:0}
-#s-map.on{display:block;height:100%;position:relative}
-#map{position:absolute;inset:0;z-index:0;background:#e6ece9}
-.leaflet-container{font-family:inherit}
-.dark-tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
-.pin{background:none;border:0}
-.pinb{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);transition:transform .15s}
-.pinb svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transform:rotate(45deg)}
-.pin.sel .pinb{transform:rotate(-45deg) scale(1.25);box-shadow:0 5px 16px rgba(0,0,0,.45)}
-.me{width:22px;height:22px;position:relative}
-.me i{position:absolute;inset:3px;border-radius:50%;background:#1B6FB5;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4)}
-.me::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:rgba(27,111,181,.25);animation:pulse 2s ease-out infinite}
-@keyframes pulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.2);opacity:0}}
-@media(prefers-reduced-motion:reduce){.me::before{animation:none}}
-#bottom{position:absolute;left:0;right:0;bottom:0;z-index:500;pointer-events:none;display:flex;flex-direction:column;gap:10px;padding-bottom:10px}
-#bottom>*{pointer-events:auto}
-.fab{align-self:flex-end;margin-inline-end:12px;width:48px;height:48px;border-radius:50%;border:0;background:var(--bg);color:var(--brand);box-shadow:0 2px 12px rgba(0,0,0,.3);display:grid;place-items:center;cursor:pointer}
-.fab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-#cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 12px 2px;scrollbar-width:none}
-#cards::-webkit-scrollbar{display:none}
-.mcard{flex:none;width:min(84%,330px);scroll-snap-align:center;background:var(--bg);border-radius:24px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.28);border:2px solid transparent}
-.mcard.sel{border-color:var(--brand)}
-.mcard .acts{display:flex;gap:8px;margin-top:10px}
-.mcard .acts .btn{padding:9px 12px;font-size:14px}
-.mcard .acts a.btn{text-decoration:none;text-align:center;flex:none;width:auto}
-.mcard .more{display:flex;gap:8px;margin-top:8px}
-#routeBar{position:absolute;top:12px;left:12px;right:12px;z-index:600;background:var(--brand);color:#fff;border-radius:20px;padding:12px 16px;display:none;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
-#routeBar.on{display:flex}
-#routeBar b{font-size:22px;line-height:26px}
-#routeBar button{background:rgba(255,255,255,.2);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}
-.mosque{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
-.ico{width:44px;height:44px;border-radius:50%;background:var(--brand);display:grid;place-items:center;flex:none}
-.ico svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.next{background:var(--brand);color:#fff;border-radius:24px;padding:24px;margin-bottom:12px}
-.next .big{font-size:48px;line-height:60px;font-weight:700}
-.times div{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-weight:600}
-.times div.cur{color:var(--brand);font-weight:700}
-#needle{width:64px;height:64px;transition:transform .3s;flex:none}
-.stories{display:flex;gap:14px;overflow-x:auto;padding:4px 0 16px}
-.story{flex:none;width:72px;text-align:center;cursor:pointer;background:none;border:0;color:var(--tx);font-family:inherit}
-.story .ring{width:68px;height:68px;border-radius:50%;padding:3px;background:conic-gradient(var(--brand),#7BE0CF,var(--brand));margin:0 auto 4px}
-.story.seen .ring{background:var(--line)}
-.story .in{width:100%;height:100%;border-radius:50%;background:var(--bg);border:3px solid var(--bg)}
-.story .in span{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700}
-.story p{font-size:12px;line-height:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#viewer{position:absolute;inset:0;z-index:50;display:none;flex-direction:column;color:#fff;padding:16px}
-#viewer.on{display:flex}
-.bars{display:flex;gap:4px;margin-bottom:12px}.bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.35);overflow:hidden}.bars i b{display:block;height:100%;width:0;background:#fff}
-#viewer .body{flex:1;display:grid;place-items:center;text-align:center;font-size:28px;line-height:36px;font-weight:700;padding:24px;white-space:pre-line}
-#viewer .x{background:none;border:0;color:#fff;font-size:32px;cursor:pointer;position:absolute;top:28px;inset-inline-end:16px}
-.bubble{max-width:80%;padding:10px 14px;border-radius:20px;margin:6px 0;font-weight:600;width:fit-content}
-.bubble.me{background:var(--brand);color:#fff;margin-inline-start:auto}
-.bubble.other{background:var(--field)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-select,.field{width:100%;background:var(--field);border:0;border-radius:16px;padding:14px 16px;font:500 16px inherit;font-family:inherit;color:var(--tx);margin:6px 0 12px}
-label{font-size:14px;font-weight:600;color:var(--tx2)}
-.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.menu{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--field);border-radius:24px;margin-bottom:12px;cursor:pointer;border:0;width:100%;text-align:start;font-family:inherit;color:var(--tx);font-size:16px}
-.sw{width:48px;height:28px;border-radius:14px;background:var(--line);position:relative;border:0;cursor:pointer;flex:none}
-.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
-.sw.on{background:var(--brand)}.sw.on::after{inset-inline-start:23px}
-.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:28px 28px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);z-index:800;transform:translateY(110%);transition:transform .25s;max-height:85%;overflow:auto}
-.sheet.on{transform:none}
-.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:1000px;font-size:14px;z-index:900;opacity:0;transition:.2s;pointer-events:none;max-width:90%;text-align:center}
-.toast.on{opacity:1}
-.step{display:flex;gap:14px;align-items:flex-start}
-.step .n{width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;display:grid;place-items:center;flex:none}
-.qrbox{background:#fff;color:#16191C;border-radius:24px;padding:24px;text-align:center;border:1px solid var(--line)}
-.qrbox svg{width:220px;height:220px;display:block;margin:16px auto}
-/* correctif : la classe .me (pastille de position sur la carte) écrasait aussi les bulles « .bubble.me » */
-.bubble.me{width:fit-content;height:auto;position:static}.bubble.me::before{content:none}
-/* --- série de prières --- */
-.streak{display:inline-flex;align-items:center;gap:4px;background:#F5B301;color:#3A2A00;border:0;border-radius:1000px;padding:5px 10px;font:800 14px inherit;font-family:inherit;cursor:pointer}
-.streak svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.serie .flame{width:56px;height:56px;border-radius:50%;background:#F5B301;color:#3A2A00;display:grid;place-items:center;flex:none}
-.serie .flame svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.dots{display:flex;gap:8px;margin-top:12px}.dot{width:22px;height:22px;border-radius:50%;background:var(--line);display:block}.dot.on{background:#F5B301}
-/* --- mode plein écran des rappels vidéo --- */
-#app.immersive header{display:none}
-#app.immersive nav{background:#101418;border-top:1px solid rgba(255,255,255,.12)}
-#app.immersive nav button{color:rgba(255,255,255,.65)}#app.immersive nav button.on{color:#fff}
-#app.immersive #s-rappels.on{padding-top:env(safe-area-inset-top)}
-/* --- rappels vidéo --- */
-#s-rappels{padding:0}#s-rappels.on{display:block;height:100%;position:relative;overflow:hidden}
-#rapTabs{position:absolute;top:10px;left:0;right:0;z-index:5;display:flex;gap:8px;justify-content:center}
-#rapTabs .chip{background:rgba(0,0,0,.4);color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}#rapTabs .chip.on{background:#fff;color:#16191C}
-#feed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}#feed::-webkit-scrollbar{display:none}
-.clip{height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 76px 28px 16px}
-.clip.empty{align-items:center;justify-content:center;background:#101418;text-align:center;padding:24px}
-.clip .quote{font-size:24px;line-height:32px;font-weight:700;margin:6px 0}.clip .who{font-weight:700;font-size:14px}
-.demoTag,.liveBadge{position:absolute;top:56px;inset-inline-start:16px;font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.04em}
-.demoTag{background:rgba(255,255,255,.2)}.liveBadge{background:#C62839;inset-inline-start:auto;inset-inline-end:16px}
-.playBig{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:28px;cursor:pointer}
-.clip.playing .playBig{opacity:.35}
-.rail{position:absolute;inset-inline-end:10px;bottom:44px;display:flex;flex-direction:column;gap:14px;align-items:center}
-.railBtn{background:rgba(0,0,0,.35);border:0;color:#fff;width:50px;min-height:50px;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 12px inherit;font-family:inherit;cursor:pointer}
-.railBtn svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.railBtn.on svg{fill:#FF4D6A;stroke:#FF4D6A}
-.prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.25)}.prog i{display:block;height:100%;width:0;background:#fff}
-#streakBtn[hidden]{display:none}
-#printArea{display:none}
-/* --- profil : emoji sans visage + position (style Snap / Waze) --- */
-.emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:6px 0 12px}
-.emojis .emo{width:48px;height:48px;font-size:24px}.emo.on{outline:3px solid var(--brand);background:var(--bg)}
-.emk{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--brand);display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.3);flex:none}
-.emk.big{width:56px;height:56px;font-size:30px}
-.emkName{position:absolute;top:46px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font:700 11px/14px inherit;font-family:inherit;padding:2px 8px;border-radius:8px;white-space:nowrap}
-/* --- trajets --- */
-.seg{display:flex;background:var(--field);border-radius:1000px;padding:4px;margin-bottom:12px}
-.seg button{flex:1;border:0;background:none;border-radius:1000px;padding:8px 4px;font:700 14px inherit;font-family:inherit;color:var(--tx2);cursor:pointer}
-.seg button.on{background:var(--brand);color:#fff}
-h2.sec{font-size:18px;margin:16px 0 8px}
-.trip{border-inline-start:6px solid var(--brand)}.trip.seek{border-inline-start-color:#F5B301}
-.tag{align-self:flex-start;font-size:11px;font-weight:800;border-radius:8px;padding:2px 8px;background:var(--brand);color:#fff;white-space:nowrap}
-.tag.seek,.tag.pending{background:#F5B301;color:#3A2A00}.tag.pending{display:inline-block;margin-top:8px}
-.btn.sm{padding:9px 14px;font-size:14px;flex:1}
-.recap>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.recap>div:last-child{border:0}.recap span{color:var(--tx2)}.recap b{text-align:end}
-/* --- page mosquée (QR code) --- */
-.mhero{border-radius:24px;padding:20px;color:#fff;margin-bottom:12px}.mhero h2{margin-top:10px}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.mtile{background:var(--field);border:0;border-radius:20px;padding:14px;text-align:start;font-family:inherit;color:var(--tx);cursor:pointer;display:flex;flex-direction:column;gap:2px}
-.mtile span{font-size:28px;line-height:34px}
-.addMq{display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:8px}
-/* --- bandeau avant la prière (sur les vidéos) --- */
-.pbar{position:absolute;top:10px;left:10px;right:10px;z-index:8;display:none;align-items:center;gap:10px;background:#FFD43B;color:#2A2000;border-radius:18px;padding:12px 12px 12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-size:14px;line-height:18px;font-weight:600}
-.pbar.on{display:flex;animation:pbIn .35s ease-out}
-.pbar b{display:block;font-size:16px;line-height:20px;font-weight:800}
-.pbIco{font-size:28px;line-height:1}
-.pbar button{border:0;border-radius:1000px;background:#2A2000;color:#FFD43B;font:800 13px inherit;font-family:inherit;padding:9px 12px;cursor:pointer;white-space:nowrap}
-#prayBanner.on~#rapTabs{top:96px}
-@keyframes pbIn{from{transform:translateY(-120%)}to{transform:none}}
-@media(prefers-reduced-motion:reduce){.pbar.on{animation:none}}
-@media print{#app{display:none!important}#printArea{display:block!important;text-align:center;font-family:sans-serif;padding:40px;color:#000}#printArea svg{width:340px;height:340px}}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <div id="app">
-<header><button id="back" aria-label="back">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="streakBtn" class="streak"></button><button id="langBtn"></button></header>
+<header><button id="back" aria-label="back">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="streakBtn" class="streak"></button><button id="langBtn"></button><button id="meBtn"></button></header>
 <main>
  <section class="screen on" id="s-map">
   <div id="map"></div>
@@ -223,6 +60,7 @@ h2.sec{font-size:18px;margin:16px 0 8px}
 </main>
 <nav id="nav"></nav>
 <div class="sheet" id="sheet"></div>
+<div id="scrim"></div>
 <div id="viewer"></div>
 <div class="toast" id="toast"></div>
 </div>
@@ -233,8 +71,8 @@ h2.sec{font-size:18px;margin:16px 0 8px}
 <script src="i18n.js"></script>
 <script src="extra-i18n.js"></script>
 <script src="mosques.js"></script>
-<script src="features.js"></script>
-<script src="features2.js"></script>
+<script src="features.js?v=2"></script>
+<script src="features2.js?v=2"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -255,7 +93,7 @@ const I={
  rappels:ICON_RAP,user:ICON_USER,
  check:'<svg viewBox="0 0 24 24"><path d="M12 1l3 2 3.5-.2 1.2 3.3 3 1.9-1.2 3.3 1.2 3.3-3 1.9-1.2 3.3L15 21l-3 2-3-2-3.5.2-1.2-3.3-3-1.9 1.2-3.3L.3 8.9l3-1.9L4.5 3.8 8 4z"/><path d="M8 12l3 3 5-6" stroke="#fff" fill="none" stroke-width="2"/></svg>'
 };
-const TABS=['map','prayers','rappels','stories','rdv','more'];
+const TABS=['rappels','map','prayers','stories','rdv','more'];
 const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more',join:'more',mosque:'map'};
 let cur='map';
 const toast=m=>{const x=$('#toast');x.textContent=m;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2000)};
@@ -274,7 +112,7 @@ function go(k){
  $$('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+k));
  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
  $('#sheet').classList.remove('on');applySectionColor(tab);
- $('#back').style.display=SUB[k]?'block':'none';
+ $('#back').style.display=SUB[k]?'block':'none';$('#app').classList.toggle('sub',!!SUB[k]);
  $('#back').textContent=RTL.includes(lang)?'→':'←';
  setTitle();renderCurrent();setImmersive(k==='rappels');
  if(k==='map'&&map)setTimeout(()=>map.invalidateSize(),50);
@@ -287,7 +125,8 @@ function setImmersive(on){
   else if(!on&&fs){const x=(d.exitFullscreen||d.webkitExitFullscreen);if(x)Promise.resolve(x.call(d)).catch(()=>{})}
  }catch(e){}
 }
-function setTitle(){$('#title').textContent=cur==='map'?t('mosques'):cur==='mosque'?t('mosquePage'):t(cur==='discover'?'discover':cur)}
+function renderMeBtn(){const b=$('#meBtn'),e=getProfile().emoji;if(!b)return;b.innerHTML=e?esc(e):I.user;b.setAttribute('aria-label',t('account'))}
+function setTitle(){renderMeBtn();$('#title').textContent=cur==='map'?t('mosques'):cur==='mosque'?t('mosquePage'):t(cur==='discover'?'discover':cur)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
 $('#back').onclick=()=>go(SUB[cur]==='map'?'map':'more');
 function renderCurrent(){
@@ -310,6 +149,8 @@ function pickLang(){
 }
 $('#sheet').addEventListener('click',e=>{const c=e.target.closest('[data-l]');if(c){lang=c.dataset.l;store.set('lang',lang);$('#sheet').classList.remove('on');applyLang()}});
 $('#langBtn').onclick=pickLang;
+$('#meBtn').onclick=()=>go('account');
+$('#scrim').onclick=()=>$('#sheet').classList.remove('on'); // toucher en dehors ferme la fenêtre
 
 /* ---------- carte (style navigation) ---------- */
 let map,pins={},userMk,routeLines=[],selected=null,watchId=null;
@@ -438,7 +279,7 @@ let seen=store.get('seen',{});STORIES[99]=store.get('st99',[]);
 function renderStories(){
  const list=MOSQUEES.concat(role==='mosquee'||STORIES[99].length?[DEMO]:[]);
  const nm=m=>m.nom.replace('Mosquée ','').replace('Grande ','').replace(/\(.*\)/,'').trim();
- $('#storyRow').innerHTML=list.map(m=>{const has=(STORIES[m.id]||[]).length>0;return `<button class="story ${seen[m.id]||!has?'seen':''}" data-id="${m.id}"><div class="ring"><div class="in"><span style="background:${m.color}">${esc(nm(m)[0])}</span></div></div><p>${esc(nm(m))}</p></button>`}).join('');
+ $('#storyRow').innerHTML=list.map(m=>{const has=(STORIES[m.id]||[]).length>0;return `<button class="story ${seen[m.id]||!has?'seen':''}" data-id="${m.id}"><div class="ring"><div class="in"><span style="background:${m.color}">${I.dome}</span></div></div><p>${esc(nm(m))}</p></button>`}).join('');
 }
 $('#storyRow').onclick=e=>{const b=e.target.closest('.story');if(!b)return;const id=+b.dataset.id;if(!(STORIES[id]||[]).length)return toast(t('noStory'));playStory(id)};
 let tm;
@@ -464,8 +305,10 @@ $('#newRdv').onclick=()=>newRdvSheet();
 
 /* ---------- Plus ---------- */
 function renderMore(){
- const items=[['account','user','accountD'],['cours','book','coursD'],['family','family','familyD'],['discover','book','discoverD'],['qr','qr','qrD'],['join','dome','joinD'],['settings','gear',null]];
- $('#moreBody').innerHTML=items.map(([k,ic,d])=>`<button class="menu" data-go="${k}"><div class="ico">${I[ic]}</div><div class="grow"><b>${t(k)}</b>${d?`<div class="small">${t(d)}</div>`:''}</div></button>`).join('');
+ const P=getProfile();
+ const items=[['cours','book','coursD','#0A7EA4'],['family','family','familyD','#C2610C'],['discover','book','discoverD','#0B8F7A'],['qr','qr','qrD','#7B3FB5'],['join','dome','joinD','#2F6FE4'],['settings','gear',null,'#4A5A6A']];
+ $('#moreBody').innerHTML=`<button class="meCard" data-go="account"><div class="emk big">${P.emoji?esc(P.emoji):I.user}</div><div class="grow"><b>${esc(P.pseudo||t('account'))}</b><div class="small">${t('accountD')}</div></div><i class="chev"></i></button>
+ <div class="mgrid">${items.map(([k,ic,d,c])=>`<button class="mtile" data-go="${k}"><div class="ico" style="background:${c}">${I[ic]}</div><b>${t(k)}</b>${d?`<div class="small">${t(d)}</div>`:''}</button>`).join('')}</div>`;
 }
 $('#moreBody').onclick=e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)};
 

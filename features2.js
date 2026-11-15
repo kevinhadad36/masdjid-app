@@ -8,7 +8,7 @@
 const PROFILE_EMOJIS=['🚗','🚙','🚐','🛵','🚲','🕌','🌙','⭐','✨','📿','📖','🌴','🌿','🍃','🌳','🌵','🌹','🌸','💎','🧭','⛰️','🌊','☀️','⚽','🏀','🎒','☕','🔑','🧱','💡'];
 let _prof;
 const getProfile=()=>_prof||(_prof=store.get('profile',{pseudo:'',emoji:'',share:false,at:0,prayNotif:false}));
-const saveProfile=()=>{store.set('profile',_prof);refreshMeMarker()};
+const saveProfile=()=>{store.set('profile',_prof);refreshMeMarker();if(typeof renderMeBtn==='function')renderMeBtn()};
 const myEmoji=()=>getProfile().emoji||'🚗';
 const myName=()=>getProfile().pseudo||t('me');
 const hasMyPos=()=>getProfile().share&&getProfile().at>0;

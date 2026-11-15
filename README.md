@@ -13,6 +13,7 @@ puis ouvrir http://127.0.0.1:8123 (idéalement en affichage mobile).
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Application (écrans, navigation, carte, prières, stories, covoiturage, famille) |
+| `style.css` | Tout le design (couleurs, cartes, barre du bas, flux vidéo, mode sombre). Refonte du 15/11/2026 : mise en forme uniquement |
 | `features2.js` | Ajouts du 15/11/2026 : profil (emoji + position), trajets validés, demande d'ajout de mosquée, page mosquée (QR), bandeau et notification avant la prière |
 | `sw.js` | Service worker minimal, seulement pour afficher la notification avant la prière (pas de cache) |
 | `features.js` | Ajouts : couleurs par section, série de prières, rappels vidéo, compte, covoiturage frères/sœurs, cours |

@@ -90,7 +90,7 @@ function renderRappels(){
    <span class="demoTag">${t('demoTag')}</span>${r.type==='live'?`<span class="liveBadge">${t('live')}</span>`:''}
    <button class="playBig" data-play aria-label="play">▶</button>
    <div class="clipBody"><div class="who">${esc(m.nom)}${r.dur?` · ${r.dur}`:''}</div><p class="quote">${t(r.q)}</p><div class="small" style="color:#fff;opacity:.85">${t(r.s)}</div></div>
-   <div class="rail">
+   <div class="rail"><div class="clipAv" style="background:${m.color}">${I.dome}</div>
     <button class="railBtn ${liked?'on':''}" data-like aria-label="${t('like')}" aria-pressed="${liked}">${ICON_HEART}${liked?'<span>1</span>':''}</button>
     <button class="railBtn" data-cmt aria-label="${t('react')}">${ICON_CMT}${nc?`<span>${nc}</span>`:''}</button>
     <button class="railBtn" data-share aria-label="${t('shareBtn')}">${ICON_SHARE}</button>
@@ -171,7 +171,9 @@ function genderChips(){
 }
 function genderBarHtml(){
  const g=getGender();
- return `<div class="card"><div class="small" style="margin-bottom:8px">${t('iAm')}</div>${genderChips()}<p class="small">${g==='sister'?t('womenOnly'):g==='brother'?t('menOnly'):t('pickGender')}</p><p class="small" style="margin-top:6px">${t('genderNote')}</p></div>`;
+ if(!g)return `<div class="card"><div class="small" style="margin-bottom:8px">${t('iAm')}</div>${genderChips()}<p class="small">${t('pickGender')}</p><p class="small" style="margin-top:6px">${t('genderNote')}</p></div>`;
+ // genre déjà choisi : bandeau compact, la note complète reste lisible en touchant le « i »
+ return `<div class="card gbar"><div class="row"><div class="small grow">${t('iAm')}</div>${genderChips()}</div><details><summary class="small">${g==='sister'?t('womenOnly'):t('menOnly')}</summary><p class="small">${t('genderNote')}</p></details></div>`;
 }
 let _pendingRdv=null;
 function setGender(g){
