@@ -8,7 +8,7 @@
 <title>Masdjid</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -69,11 +69,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="i18n.js?v=3"></script>
-<script src="extra-i18n.js?v=3"></script>
-<script src="mosques.js"></script>
-<script src="features.js?v=3"></script>
-<script src="features2.js?v=3"></script>
+<script src="i18n.js?v=4"></script>
+<script src="extra-i18n.js?v=4"></script>
+<script src="mosques.js?v=4"></script>
+<script src="prayertimes.js?v=4"></script>
+<script src="features.js?v=4"></script>
+<script src="features2.js?v=4"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -84,9 +85,10 @@ const I={
  map:'<svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
  prayers:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
  stories:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="4 3"/><circle cx="12" cy="12" r="4"/></svg>',
- rdv:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',
+ rdv:'<svg viewBox="0 0 24 24"><path d="M5 17H3v-5l2-5h14l2 5v5h-2M5 12h14"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>', // Trajets = voiture
  more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
- dome:'<svg viewBox="0 0 24 24"><path d="M4 21V13a8 8 0 0 1 16 0v8M2 21h20M12 2v3"/></svg>',
+ // mosquée : dôme surmonté du croissant + minaret (l'ancien dessin ressemblait à une cloche)
+ dome:'<svg viewBox="0 0 24 24"><path d="M2 21h20M4 21v-6h12v6M4.5 15c0-3.2 2.6-4.6 5.5-7 2.9 2.4 5.5 3.8 5.5 7M10 8V6M18.5 21V10.5h2.5V21M18.5 10.5l1.25-2.5 1.25 2.5M8.5 21v-2.6a1.5 1.5 0 0 1 3 0V21"/><path d="M10.9 3.1a1.5 1.5 0 1 0 0 2.4 1.9 1.9 0 0 1 0-2.4z"/></svg>',
  family:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="10" r="2.2"/><path d="M2 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5M15 20c0-2.5 1.5-4 4-4s3 1.5 3 4"/></svg>',
  book:'<svg viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6M20 4v14h-6"/></svg>',
  qr:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7h-3"/></svg>',
@@ -163,6 +165,17 @@ new MutationObserver(()=>{
  if(on&&s.inert){s.inert=false;sheetBack=document.activeElement;const h=s.querySelector('h2');s.setAttribute('aria-label',h?h.textContent:'');const f=s.querySelector('button,select,input,a[href]');if(f)setTimeout(()=>f.focus({preventScroll:true}),60)}
  else if(!on&&!s.inert){s.inert=true;if(sheetBack&&document.contains(sheetBack))sheetBack.focus({preventScroll:true});sheetBack=null}
 }).observe($('#sheet'),{attributes:true,attributeFilter:['class']});
+// formulaires : chaque <label> posé juste avant son champ lui donne son nom (lecteurs d'écran) ; sinon le texte d'aide sert de nom
+let _lblRaf=0;
+function linkLabels(){
+ _lblRaf=0;
+ $$('#app label:not([for])').forEach(l=>{if(l.querySelector('input,select,textarea'))return;let n=l.nextElementSibling;
+  if(n&&!/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName))n=n.querySelector&&n.querySelector('input,select,textarea');
+  if(n&&n.id)l.htmlFor=n.id});
+ $$('#app input:not([type=checkbox]):not([aria-label]),#app select:not([aria-label]),#app textarea:not([aria-label])').forEach(f=>{
+  if(f.id&&document.querySelector(`label[for="${f.id}"]`))return;const ph=f.getAttribute('placeholder')||(f.previousElementSibling&&f.previousElementSibling.textContent)||'';if(ph.trim())f.setAttribute('aria-label',ph.trim())});
+}
+new MutationObserver(()=>{if(!_lblRaf)_lblRaf=setTimeout(linkLabels,0)}).observe($('#app'),{childList:true,subtree:true});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#viewer').classList.contains('on'))return closeStory();if($('#sheet').classList.contains('on'))$('#sheet').classList.remove('on')});
 
 /* ---------- carte (style navigation) ---------- */
@@ -183,7 +196,10 @@ function renderList(){renderCards()}
 function renderCards(){
  const l=MOSQUEES.map(m=>({...m,d:dist(pos,m)})).sort((a,b)=>a.d-b.d);
  // carte mosquée : 2 groupes clairs — « y aller » (itinéraire, Waze, Maps) puis « la mosquée » (covoiturage, sa page)
- $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><button class="mhead row" data-act="sel" aria-label="${esc(m.nom)}"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${fmtKm(m.d)}</div></button>
+ // chaque carte dit tout de suite la prochaine prière (et la Jumu'a si la mosquée la publie) ; distance « depuis le centre » tant que la position n'est pas connue
+ const nx=m=>{const T=timesFor(m),n=nextOf(T.h);return `<div class="mnext"><span>${t('nextShort',{p:t(n.k),h:n.at})}</span>${T.jumua?`<span>${t('jumua')} ${T.jumua}</span>`:''}</div>`};
+ const km=m=>fmtKm(m.d)+(hasFix?'':'<br>'+t('fromCenterShort'));
+ $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><button class="mhead row" data-act="sel" aria-label="${esc(m.nom+', '+fmtKm(m.d))}"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small mkm">${km(m)}</div></button>${nx(m)}
  <div class="acts"><button class="btn" data-act="route">${t('route')}</button><a class="btn ghost" target="_blank" rel="noopener" href="https://waze.com/ul?ll=${m.lat},${m.lng}&navigate=yes">Waze</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=driving">Maps</a></div>
  <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="page">${t('mosquePage')}</button></div></div>`).join('')+`<div class="mcard addMq"><b>${t('notListed')}</b><button class="btn" data-act="join">${t('joinBtn')}</button></div>`;
 }
@@ -232,27 +248,47 @@ $('#locate').onclick=()=>{
 };
 
 /* ---------- prières (par mosquée) ---------- */
-const FALLBACK={fajr:'06:12',dhuhr:'13:05',asr:'15:48',maghrib:'18:02',isha:'19:30'};
 const KEYS=['fajr','dhuhr','asr','maghrib','isha'],API={fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'};
 // Méthode du site de la mosquée du Mirail : Ligue islamique mondiale, Fajr/Isha 15°, Dhuhr +1 min, Maghrib +5 min
 const MIRAIL_Q='&method=99&methodSettings=15,null,15&tune=0,0,0,1,0,5,0,0,0';
-let prayMosque=store.get('pm',0),horaires=FALLBACK,live=false,iqama=null,srcKey='src_city';
 const addMin=(h,n)=>{const[a,b]=h.split(':').map(Number),t=a*60+b+n;return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
-async function loadTimes(){
- const m=prayMosque?mq(prayMosque):null,p=m?{lat:m.lat,lng:m.lng}:(dist(pos,TOULOUSE)<30?pos:TOULOUSE);iqama=null;
- srcKey=m?'src_'+m.src:'src_city';
- if(m&&m.src==='mawaqit'){
-  const d=new Date(),W=MAWAQIT[m.id],row=W.cal[d.getMonth()][d.getDate()],iq=(W.iqama[d.getMonth()]||{})[d.getDate()];
-  horaires={fajr:row[0],dhuhr:row[2],asr:row[3],maghrib:row[4],isha:row[5]};
-  iqama=null;if(iq){iqama={};KEYS.forEach((k,n)=>{const v=iq[n];iqama[k]=/^\+/.test(v)?addMin(horaires[k],+v.slice(1)):v})}
-  live=true;return prieres();
+/* Horaires TOUJOURS justes, jamais inventés :
+   1) mosquée Mawaqit → son calendrier officiel (dans l'appli, marche hors ligne)
+   2) sinon → calcul sur le téléphone (prayertimes.js, mêmes formules que l'API, à la minute près), affiché tout de suite
+   3) puis l'API Aladhan confirme quand il y a du réseau ; sa réponse est gardée en mémoire pour la journée. */
+const methodOf=m=>m&&m.src==='mirail'?'mirail':'france12';
+function timesFor(m,p,date){ // horaires d'un jour pour une mosquée (ou un point) : {h, iq, jumua, mode}
+ const d=date||new Date();
+ if(m&&m.src==='mawaqit'&&MAWAQIT[m.id]){
+  const W=MAWAQIT[m.id],row=W.cal[d.getMonth()][d.getDate()],iq=(W.iqama[d.getMonth()]||{})[d.getDate()];
+  const h={fajr:row[0],dhuhr:row[2],asr:row[3],maghrib:row[4],isha:row[5]};let q=null;
+  if(iq){q={};KEYS.forEach((k,n)=>{const v=iq[n];q[k]=/^\+/.test(v)?addMin(h[k],+v.slice(1)):v})}
+  return{h,iq:q,jumua:W.jumua,mode:'mawaqit'};
  }
- const method=(m&&m.src==='mirail')?MIRAIL_Q:'&method=12';
- try{const r=await fetch(`https://api.aladhan.com/v1/timings?latitude=${p.lat}&longitude=${p.lng}${method}`);const j=await r.json();
-  horaires={};KEYS.forEach(k=>horaires[k]=j.data.timings[API[k]].slice(0,5));live=true}
- catch(e){horaires=FALLBACK;live=false}
- prieres();
+ const pt=p||(m?{lat:m.lat,lng:m.lng}:TOULOUSE),r=PT.times(d,pt.lat,pt.lng,PT.METHODS[methodOf(m)]),h={};
+ KEYS.forEach(k=>h[k]=r[k]);return{h,iq:null,jumua:null,mode:'local'};
 }
+let prayMosque=store.get('pm',0),horaires=timesFor(null,TOULOUSE).h,timesMode='local',timesDay='',timesReq=0,iqama=null,srcKey='src_city';
+async function loadTimes(){
+ const m=prayMosque?mq(prayMosque):null,p=m?{lat:m.lat,lng:m.lng}:(dist(pos,TOULOUSE)<30?pos:TOULOUSE);
+ srcKey=m?'src_'+m.src:'src_city';timesDay=dayKey();
+ const req=++timesReq,ck=m?'m'+m.id:'c'+p.lat.toFixed(2)+','+p.lng.toFixed(2),cache=store.get('tcache',{});
+ const first=timesFor(m,p);
+ horaires=first.h;iqama=first.iq;timesMode=first.mode;
+ if(first.mode==='local'&&cache[ck]&&cache[ck].d===timesDay){horaires=cache[ck].t;timesMode='api'}
+ prieres();if(typeof checkPrayerTime==='function')checkPrayerTime();
+ if(timesMode!=='local')return; // Mawaqit ou déjà confirmé aujourd'hui
+ const d=new Date(),ds=String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+ try{
+  const r=await fetch(`https://api.aladhan.com/v1/timings/${ds}?latitude=${p.lat}&longitude=${p.lng}${methodOf(m)==='mirail'?MIRAIL_Q:'&method=12'}`);
+  const j=await r.json();if(req!==timesReq)return; // l'utilisateur a changé de mosquée entre-temps
+  const h={};KEYS.forEach(k=>{const v=j.data.timings[API[k]].slice(0,5);if(!/^\d\d:\d\d$/.test(v))throw 0;h[k]=v});
+  horaires=h;timesMode='api';
+  cache[ck]={d:timesDay,t:h};const ks=Object.keys(cache);if(ks.length>12)delete cache[ks[0]];store.set('tcache',cache);
+  prieres();if(typeof checkPrayerTime==='function')checkPrayerTime();
+ }catch(e){/* pas de réseau ou API en panne : on garde le calcul du téléphone, identique à la minute près */}
+}
+const nextOf=h=>{const now=new Date(),c=now.getHours()*60+now.getMinutes(),mins=x=>+x.slice(0,2)*60+ +x.slice(3);const k=KEYS.find(x=>mins(h[x])>c);return k?{k,at:h[k]}:{k:'fajr',at:h.fajr,tomorrow:true}};
 function prieres(){
  const now=new Date(),mins=h=>{const[a,b]=h.split(':');return +a*60+ +b},c=now.getHours()*60+now.getMinutes();
  let nxt=KEYS.find(k=>mins(horaires[k])>c),diff;
@@ -263,7 +299,7 @@ function prieres(){
  const m=prayMosque?mq(prayMosque):null;
  $('#times').innerHTML=KEYS.map(k=>`<div class="${k===nxt?'cur':''}"><span>${t(k)}</span><span dir="ltr">${horaires[k]}${iqama?' <span class="small">· '+t('iqama')+' '+iqama[k]+'</span>':''}</span></div>`).join('')
   +(m&&m.src==='mawaqit'?`<div><span>${t('jumua')}</span><span dir="ltr">${MAWAQIT[m.id].jumua}</span></div>`:'')
-  +`<div class="small" style="border:0;display:block">${live?t(srcKey):t('demoTimes')}</div>`;
+  +`<div class="small" style="border:0;display:block">${t(srcKey)}${timesMode==='local'?' '+t('calcLocal'):''}</div>`;
  const r=x=>x*Math.PI/180,K={lat:21.4225,lng:39.8262};
  const y=Math.sin(r(K.lng-pos.lng))*Math.cos(r(K.lat)),x=Math.cos(r(pos.lat))*Math.sin(r(K.lat))-Math.sin(r(pos.lat))*Math.cos(r(K.lat))*Math.cos(r(K.lng-pos.lng));
  const b=(Math.atan2(y,x)*180/Math.PI+360)%360;
@@ -377,12 +413,16 @@ function renderSettings(){
  const sw=(id,on,label,desc)=>`<div class="set"><div class="grow"><span>${label}</span>${desc?`<div class="small">${desc}</div>`:''}</div><button class="sw ${on?'on':''}" id="${id}" role="switch" aria-checked="${!!on}" aria-label="${esc(label)}"></button></div>`;
  $('#settingsBody').innerHTML=`<div class="card row"><div class="ico" style="width:56px;height:56px">${I.dome}</div><div class="grow"><h2>${m?t('roleMosque'):t('roleFidele')}</h2></div></div>`+
  sw('stNotif',P.prayNotif,t('prayNotif'),t('prayNotifD'))+sw('stShare',P.share,t('share'),t('sharePosD'))+
- `<div class="set"><span>${t('language')}</span><button class="chip" id="sl">${LANGS[lang]}</button></div><div class="set"><span>${t('spent')}</span><span class="small" id="spent">${Math.floor(spent/60)} min</span></div>
- <div style="height:16px"></div><div class="card"><div class="small" style="margin-bottom:8px">${t('demo')}</div><button class="btn ghost" id="roleBtn">${m?t('toFidele'):t('toMosque')}</button></div>`;
+ `<div class="set"><span>${t('language')}</span><button class="chip" id="sl">${LANGS[lang]}</button></div>`+
+ (getGender()?`<div class="set"><span>${t('iAm')} <b>${t(getGender())}</b></span><button class="chip" id="sg">${t('change')}</button></div>`:'')+
+ `<div class="set"><span>${t('spent')}</span><span class="small" id="spent">${Math.floor(spent/60)} min</span></div>`+
+ // mode « mosquée » (publier stories, cours, dons) : caché du public ; visible seulement avec ?gestion dans l'adresse (démo responsables)
+ (m||/[?&]gestion\b/.test(location.search)?`<div style="height:16px"></div><div class="card"><div class="small" style="margin-bottom:8px">${t('demo')}</div><button class="btn ghost" id="roleBtn">${m?t('toFidele'):t('toMosque')}</button></div>`:'');
+ if($('#sg'))$('#sg').onclick=changeGenderSheet;
  $('#stNotif').onclick=async()=>{if(!P.prayNotif){const ok=await askNotifPermission();if(!ok)return toast(t('notifRefused'))}P.prayNotif=!P.prayNotif;saveProfile();renderSettings()};
  $('#stShare').onclick=()=>{P.share=!P.share;if(!P.share)P.at=0;saveProfile();renderSettings();if(P.share)locateMe()};
  $('#sl').onclick=pickLang;
- $('#roleBtn').onclick=()=>{role=m?'fidele':'mosquee';store.set('role',role);renderRole();renderSettings()};
+ if($('#roleBtn'))$('#roleBtn').onclick=()=>{role=m?'fidele':'mosquee';store.set('role',role);renderRole();renderSettings()};
 }
 // temps passé : compté chaque seconde, enregistré toutes les 30 s seulement (moins d'écritures sur le téléphone)
 setInterval(()=>{spent++;if(spent%30===0)store.set('spent',spent);const e=$('#spent');if(e)e.textContent=Math.floor(spent/60)+' min'},1000);
@@ -390,7 +430,7 @@ addEventListener('pagehide',()=>store.set('spent',spent));
 
 /* ---------- démarrage ---------- */
 $('#streakBtn').onclick=()=>go('prayers');
-initRappels();initGender();initCours();initMap();applySectionColor('prayers');applyLang();renderStreakBadge();setInterval(prieres,30000); // applyLang charge déjà les horaires
+initRappels();initGender();initCours();initMap();applySectionColor('prayers');applyLang();renderStreakBadge();setInterval(()=>{if(dayKey()!==timesDay)loadTimes();else prieres()},30000); // applyLang charge déjà les horaires ; nouveau jour → nouveaux horaires
 initFeatures2();
 go('prayers'); // ouverture sur la prochaine prière (critique du 19/11/2026) ; les vidéos restent dans l'onglet Rappels
 readHash(); // QR code d'une mosquée : #mosquee=<id> ouvre sa page

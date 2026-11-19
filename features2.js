@@ -238,10 +238,13 @@ function renderMosquePage(){
  const m=mq(pageMosque);if(!m)return;
  const don=donLink(m.id),isM=role==='mosquee',n=allTrips().filter(x=>x.m===m.id&&x.g===getGender()).length;
  const links=(m.site?`<a href="${esc(m.site)}" target="_blank" rel="noopener">${t('site')}</a>`:'')+(typeof MAWAQIT!=='undefined'&&MAWAQIT[m.id]?`<a href="https://mawaqit.net/en/m/${MAWAQIT[m.id].slug}" target="_blank" rel="noopener">Mawaqit</a>`:'');
- $('#mosqueBody').innerHTML=`<div class="mhero" style="background-color:${m.color}"><div class="ico" style="background:rgba(255,255,255,.2)">${I.dome}</div><h2>${esc(m.nom)}</h2><div class="mheroTx">${esc(m.adr||'')}</div><div class="mheroTx" style="margin-top:2px">${m.lat?fmtKm(dist(pos,m)):''}</div></div>
- ${links?`<div class="mlinks">${links}</div>`:''}
+ // horaires du jour directement sur la page (plus besoin de passer par une tuile)
+ const T=timesFor(m),nk=nextOf(T.h).k;
+ const today=`<div class="card times mtimes"><h2 style="margin:0 0 6px">${t('todayTimes')}</h2>${KEYS.map(k=>`<div class="${k===nk?'cur':''}"><span>${t(k)}</span><span dir="ltr">${T.h[k]}${T.iq?` <span class="small">· ${t('iqama')} ${T.iq[k]}</span>`:''}</span></div>`).join('')}${T.jumua?`<div><span>${t('jumua')}</span><span dir="ltr">${T.jumua}</span></div>`:`<div class="small" style="border:0;display:block">${t('jumuaUnknown')}</div>`}</div>`;
+ $('#mosqueBody').innerHTML=`<div class="mhero" style="background-color:${m.color}"><div class="ico" style="background:rgba(255,255,255,.2)">${I.dome}</div><h2>${esc(m.nom)}</h2><div class="mheroTx">${esc(m.adr||'')}</div><div class="mheroTx" style="margin-top:2px">${m.lat?fmtKm(dist(pos,m))+(hasFix?'':' '+t('fromCenterShort')):''}</div></div>
+ ${links?`<div class="mlinks">${links}</div>`:''}${today}
  <div class="mgrid">
-  <button class="mtile" id="mpTimes"><div class="ico" style="background:${m.color}">${I.prayers}</div><b>${t('prayers')}</b><div class="small">${t('timesD')}</div></button>
+  <button class="mtile" id="mpTimes"><div class="ico" style="background:${m.color}">${I.prayers}</div><b>${t('prayers')}</b><div class="small">${t('timesD2')}</div></button>
   <button class="mtile" id="mpRoute"><div class="ico" style="background:${m.color}">${I.map}</div><b>${t('route')}</b><div class="small">${t('routeD')}</div></button>
   <button class="mtile" id="mpCov"><div class="ico" style="background:${m.color}">${I.car}</div><b>${t('carpool')}</b><div class="small">${getGender()?t('tripsN',{n}):t('carpoolD')}</div></button>
   <button class="mtile" id="mpDon"><div class="ico" style="background:${m.color}">${ICON_HEART}</div><b>${t('donate')}</b><div class="small">${don?t('donateD'):t('donNone')}</div></button>
@@ -274,9 +277,14 @@ function checkPrayerTime(){
  const show=test||(diff>0&&diff<=PRAY_LEAD&&_banHidden!==key);
  if(show){
   // « J'y vais » ferme le bandeau (on ne renvoie pas plus loin dans l'appli : le but est d'en sortir)
-  b.innerHTML=`<div class="pbIco">${I.dome}</div><div class="grow"><b>${t('banTitle',{p:t(k),n:diff})}</b><div>${t('banText')}</div></div><button id="pbGo">${t('banGo')}</button>`;
-  b.classList.add('on');$('#pbGo').onclick=()=>{_banTest=0;_banHidden=key;b.classList.remove('on');toast(t('banBye'))};
- }else b.classList.remove('on');
+  // déjà affiché pour cette prière : on met juste à jour les minutes (sinon le bouton est recréé et le focus perdu)
+  if(b.dataset.key===key&&b.classList.contains('on')&&$('#pbGo'))b.querySelector('b').textContent=t('banTitle',{p:t(k),n:diff});
+  else{
+   b.dataset.key=key;
+   b.innerHTML=`<div class="pbIco">${I.dome}</div><div class="grow"><b>${t('banTitle',{p:t(k),n:diff})}</b><div>${t('banText')}</div></div><button id="pbGo">${t('banGo')}</button>`;
+   b.classList.add('on');$('#pbGo').onclick=()=>{_banTest=0;_banHidden=key;b.classList.remove('on');toast(t('banBye'))};
+  }
+ }else{b.classList.remove('on');b.dataset.key=''}
  // notification « mode avion » : une seule fois par prière et par jour
  if(!_notified)_notified=store.get('notified',{});
  if(!test&&P.prayNotif&&diff>0&&diff<=PRAY_LEAD&&!_notified[key]){_notified={[key]:1};store.set('notified',_notified);showPrayNotif(k,diff)}

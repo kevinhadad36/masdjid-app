@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-19T17:12:04.570Z",
+        "reason": "Claude: faux positif vérifié (critique B 19/11) — en sombre les ombres colorées sont neutralisées (style.css .btn box-shadow:none, .next/.meCard rgba noir) ; aucun scan rendu ne le reproduit"
+      }
+    ]
+  }
+}

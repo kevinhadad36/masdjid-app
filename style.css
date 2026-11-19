@@ -97,7 +97,7 @@ h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
 .mcard .acts .btn{min-height:42px;padding:9px 12px;font-size:14px}
 .mcard .acts a.btn{text-decoration:none;text-align:center;flex:none;width:auto;display:grid;place-items:center}
 .mcard .more{display:flex;gap:8px;margin-top:8px}
-.mcard .more .chip{flex:1;min-height:38px;padding:8px 6px;font-size:13px;background:transparent;border:1.5px solid var(--line)}
+.mcard .more .chip{flex:1;min-height:44px;padding:8px 6px;font-size:13px;background:transparent;border:1.5px solid var(--line)}
 .mcard .more .chip:active{background:var(--field);color:var(--tx)}
 #routeBar{position:absolute;top:12px;left:12px;right:12px;z-index:600;background:var(--brand);color:#fff;border-radius:20px;padding:12px 16px;display:none;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #routeBar.on{display:flex}
@@ -112,7 +112,7 @@ h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
 .next>*{position:relative;z-index:1}
 .next .small{text-transform:uppercase;letter-spacing:.08em;font-size:12px}
 .next .big{font-size:50px;line-height:58px;font-weight:800;letter-spacing:-.02em;margin:2px 0}
-#nextIn{display:inline-block;background:rgba(255,255,255,.18);border-radius:1000px;padding:4px 12px;font-size:14px;line-height:20px;font-weight:700!important;margin-top:4px}
+#nextIn{display:inline-block;background:rgba(0,0,0,.28);border-radius:1000px;padding:4px 12px;font-size:14px;line-height:20px;font-weight:700!important;margin-top:4px}
 .times{padding:8px}
 .times div{display:flex;justify-content:space-between;align-items:center;padding:12px 12px;border-radius:14px;font-weight:700;font-variant-numeric:tabular-nums}
 .times div+div{margin-top:2px}
@@ -157,9 +157,9 @@ select:focus,.field:focus{border-color:var(--brand-tx);box-shadow:0 0 0 4px colo
 .card select,.card .field,.sheet select,.sheet .field{background-color:var(--bg)}
 label{font-size:13px;font-weight:700;color:var(--tx2)}
 .set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.sw{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;border:0;cursor:pointer;flex:none;transition:background .2s}
-.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
-.sw.on{background:var(--brand)}.sw.on::after{inset-inline-start:23px}
+.sw{width:50px;height:30px;border-radius:15px;background:var(--field);position:relative;border:2px solid var(--tx3);box-sizing:border-box;cursor:pointer;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:22px;height:22px;border-radius:50%;background:var(--tx3);transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.on{background:var(--brand);border-color:var(--brand)}.sw.on::after{inset-inline-start:22px;background:#fff}
 
 /* --- fenêtre du bas + voile --- */
 .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surf);border-radius:28px 28px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);z-index:800;transform:translateY(110%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-height:88%;overflow:auto;overscroll-behavior:contain}
@@ -242,6 +242,7 @@ h2.sec{font-size:17px;margin:18px 0 10px}
 .tag{align-self:flex-start;font-size:12px;font-weight:800;border-radius:8px;padding:3px 8px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand-tx);white-space:nowrap}
 .tag.seek,.tag.pending{background:color-mix(in srgb,var(--gold) 26%,transparent);color:#7A5600}.tag.pending{display:inline-block;margin-top:8px}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tag.seek,:root:not([data-theme=light]) .tag.pending{color:var(--gold)}}
+:root[data-theme=dark] .tag.seek,:root[data-theme=dark] .tag.pending{color:var(--gold)}
 .trip.seek .emk{border-color:var(--gold)}
 .recap>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.recap>div:last-child{border:0}.recap span{color:var(--tx2)}.recap b{text-align:end}
 .gbar{padding:12px 14px}
@@ -300,3 +301,12 @@ h2.sec{font-size:17px;margin:18px 0 10px}
 :root[data-theme=dark] .btn{box-shadow:none}:root[data-theme=dark] .next,:root[data-theme=dark] .meCard{box-shadow:0 8px 24px rgba(0,0,0,.45)}
 /* deux boutons côte à côte : texte sur une seule ligne */
 .row>.btn{padding-inline:10px;font-size:14px}
+
+/* contrôles natifs (listes, heure, cases) dans le thème du téléphone */
+:root{color-scheme:light dark}:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+/* carte mosquée : prochaine prière + Jumu'a */
+.mnext{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 2px;font-size:14px;line-height:19px;font-weight:700;color:var(--brand-tx)}
+.mkm{text-align:end;flex:none}
+.mtimes h2{font-size:17px}
+/* cibles tactiles : au moins 44 px de haut */
+#streakBtn,#langBtn{min-height:44px}#back,#meBtn{min-width:44px;min-height:44px}.seg button{min-height:44px}#pbGo{min-height:44px}#rtClose{min-width:44px;min-height:44px}

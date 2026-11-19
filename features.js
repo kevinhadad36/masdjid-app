@@ -192,12 +192,22 @@ function genderChips(){
 function genderBarHtml(){
  const g=getGender();
  if(!g)return `<div class="card"><div class="small" style="margin-bottom:8px">${t('iAm')}</div>${genderChips()}<p class="small">${t('pickGender')}</p><p class="small" style="margin-top:6px">${t('genderNote')}</p></div>`;
- // genre déjà choisi : bandeau compact, la note complète reste lisible en touchant le « i »
- return `<div class="card gbar"><div class="row"><div class="small grow">${t('iAm')}</div>${genderChips()}</div><details><summary class="small">${g==='sister'?t('womenOnly'):t('menOnly')}</summary><p class="small">${t('genderNote')}</p></details></div>`;
+ // genre déjà choisi : VERROUILLÉ (plus de bascule en un tap). On ne le change que dans Réglages, avec confirmation.
+ return `<div class="card gbar"><div class="row"><div class="small grow">${t('iAm')} <b>${t(g)}</b></div></div><div class="small" style="margin-top:4px">${g==='sister'?t('womenOnly'):t('menOnly')}</div><details><summary class="small">${t('genderWhy')}</summary><p class="small">${t('genderNote')} ${t('genderChange')}</p></details></div>`;
+}
+// changement de genre : seulement depuis Réglages, après confirmation (vide les trajets et messages de l'autre espace)
+function changeGenderSheet(){
+ const g=getGender(),o=g==='sister'?'brother':'sister';
+ $('#sheet').innerHTML=`<h2>${t('genderChgTitle')}</h2><p class="muted" style="margin:8px 0 16px">${t('genderChgText',{a:t(g),b:t(o)})}</p>
+ <button class="btn" id="gcOk">${t('genderChgOk',{b:t(o)})}</button><div style="height:8px"></div><button class="btn ghost" id="gcNo">${t('cancel')}</button>`;
+ $('#sheet').classList.add('on');
+ $('#gcNo').onclick=()=>$('#sheet').classList.remove('on');
+ $('#gcOk').onclick=()=>{_gender=o;store.set('gender',o);$('#sheet').classList.remove('on');toast(t('saved'));if(cur==='settings')renderSettings()};
 }
 let _pendingRdv=null;
 function setGender(g){
  if(g!=='brother'&&g!=='sister')return;
+ if(getGender()&&getGender()!==g)return changeGenderSheet(); // déjà choisi : jamais en un seul tap
  _gender=g;store.set('gender',g);
  if(cur==='rdv')renderRdv();
 }
