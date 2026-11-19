@@ -8,15 +8,15 @@
 <title>Masdjid</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div id="app">
-<header><button id="back" aria-label="back">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="streakBtn" class="streak"></button><button id="langBtn"></button><button id="meBtn"></button></header>
+<header><button id="back" aria-label="Retour">←</button><h1 id="title"></h1><span id="roleTag" class="badge" hidden></span><button id="streakBtn" class="streak"></button><button id="langBtn"></button><button id="meBtn"></button></header>
 <main>
  <section class="screen on" id="s-map">
   <div id="map"></div>
-  <div id="routeBar"><div class="grow"><b id="rtTime"></b><div class="small" id="rtSub" style="color:#fff;opacity:.9"></div></div><button id="rtClose" aria-label="close">×</button></div>
+  <div id="routeBar"><div class="grow"><b id="rtTime"></b><div class="small" id="rtSub" style="color:#fff;opacity:.9"></div></div><button id="rtClose" aria-label="Fermer">×</button></div>
   <div id="bottom">
    <button class="fab" id="locate" aria-label="locate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8.5"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg></button>
    <div id="cards"></div>
@@ -24,7 +24,8 @@
  </section>
 
  <section class="screen" id="s-prayers">
-  <select id="pm" aria-label="mosque"></select>
+  <select id="pm" aria-label="Mosquée"></select>
+  <div id="pmNote"></div>
   <div class="next"><div class="small" id="tNext" style="color:#fff;opacity:.85"></div><div class="big" id="nextName">–</div><div id="nextIn" style="font-weight:600">–</div></div>
   <div class="card times" id="times"></div>
   <div id="serieBox"></div>
@@ -58,21 +59,21 @@
  <section class="screen" id="s-join"><div id="joinBody"></div></section>
  <section class="screen" id="s-mosque"><div id="mosqueBody"></div></section>
 </main>
-<nav id="nav"></nav>
-<div class="sheet" id="sheet"></div>
+<nav id="nav" aria-label="Navigation"></nav>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" inert></div>
 <div id="scrim"></div>
 <div id="viewer"></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 <div id="printArea"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="i18n.js"></script>
-<script src="extra-i18n.js"></script>
+<script src="i18n.js?v=3"></script>
+<script src="extra-i18n.js?v=3"></script>
 <script src="mosques.js"></script>
-<script src="features.js?v=2"></script>
-<script src="features2.js?v=2"></script>
+<script src="features.js?v=3"></script>
+<script src="features2.js?v=3"></script>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get(k,d){try{const v=localStorage.getItem('m_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('m_'+k,JSON.stringify(v))}catch(e){}}};
@@ -90,13 +91,22 @@ const I={
  book:'<svg viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6M20 4v14h-6"/></svg>',
  qr:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v7h-3"/></svg>',
  gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+ cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ car:'<svg viewBox="0 0 24 24"><path d="M5 17H3v-5l2-5h14l2 5v5h-2M5 12h14"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>',
  rappels:ICON_RAP,user:ICON_USER,
  check:'<svg viewBox="0 0 24 24"><path d="M12 1l3 2 3.5-.2 1.2 3.3 3 1.9-1.2 3.3 1.2 3.3-3 1.9-1.2 3.3L15 21l-3 2-3-2-3.5.2-1.2-3.3-3-1.9 1.2-3.3L.3 8.9l3-1.9L4.5 3.8 8 4z"/><path d="M8 12l3 3 5-6" stroke="#fff" fill="none" stroke-width="2"/></svg>'
 };
-const TABS=['rappels','map','prayers','stories','rdv','more'];
-const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more',join:'more',mosque:'map'};
-let cur='map';
-const toast=m=>{const x=$('#toast');x.textContent=m;x.classList.add('on');setTimeout(()=>x.classList.remove('on'),2000)};
+// 5 onglets : l'essentiel d'abord (prochaine prière), les vidéos ensuite. Les stories passent dans « Plus ».
+const TABS=['prayers','map','rdv','rappels','more'];
+const SUB={family:'more',discover:'more',qr:'more',settings:'more',account:'more',cours:'more',join:'more',stories:'more',mosque:'map'};
+let cur='prayers';
+// toast : message court lu par les lecteurs d'écran ; avec {action} il propose « Annuler » (ou un autre bouton) pendant 6 s
+let toastT;
+const toast=(m,o={})=>{const x=$('#toast');x.textContent='';const s=document.createElement('span');s.textContent=m;x.append(s);
+ if(o.action){const b=document.createElement('button');b.textContent=o.label||t('undo');b.onclick=()=>{x.classList.remove('on');o.action()};x.append(b)}
+ x.classList.toggle('act',!!o.action);x.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>x.classList.remove('on'),o.action?6000:Math.max(3500,m.length*60))};
+// distances au format de la langue : « 5,8 km » en français (chiffres latins partout)
+const fmtKm=d=>{try{return d.toLocaleString(lang+'-u-nu-latn',{minimumFractionDigits:1,maximumFractionDigits:1})+' km'}catch(e){return d.toFixed(1)+' km'}};
 
 /* ---------- données d'exemple (fictives) ---------- */
 const TOULOUSE={lat:43.6047,lng:1.4442}; // ville de départ du projet
@@ -108,23 +118,18 @@ const mq=id=>id===99?DEMO:MOSQUEES.find(m=>m.id===id);
 
 /* ---------- navigation ---------- */
 function go(k){
+ if(tempPm&&k!=='prayers'){tempPm=false;prayMosque=store.get('pm',0);fillPm();loadTimes()} // on revient à la mosquée enregistrée
  cur=k;const tab=SUB[k]||k;
  $$('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+k));
- $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+ $$('#nav button').forEach(b=>{const on=b.dataset.t===tab;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  $('#sheet').classList.remove('on');applySectionColor(tab);
  $('#back').style.display=SUB[k]?'block':'none';$('#app').classList.toggle('sub',!!SUB[k]);
  $('#back').textContent=RTL.includes(lang)?'→':'←';
  setTitle();renderCurrent();setImmersive(k==='rappels');
  if(k==='map'&&map)setTimeout(()=>map.invalidateSize(),50);
 }
-function setImmersive(on){
- $('#app').classList.toggle('immersive',on);
- try{
-  const d=document,el=d.documentElement,fs=d.fullscreenElement||d.webkitFullscreenElement;
-  if(on&&!fs){const r=(el.requestFullscreen||el.webkitRequestFullscreen);if(r)Promise.resolve(r.call(el)).catch(()=>{})}
-  else if(!on&&fs){const x=(d.exitFullscreen||d.webkitExitFullscreen);if(x)Promise.resolve(x.call(d)).catch(()=>{})}
- }catch(e){}
-}
+// vidéos : fond sombre et en-tête masqué, mais plus de plein écran forcé (on garde la barre d'état du téléphone)
+function setImmersive(on){$('#app').classList.toggle('immersive',on)}
 function renderMeBtn(){const b=$('#meBtn'),e=getProfile().emoji;if(!b)return;b.innerHTML=e?esc(e):I.user;b.setAttribute('aria-label',t('account'))}
 function setTitle(){renderMeBtn();$('#title').textContent=cur==='map'?t('mosques'):cur==='mosque'?t('mosquePage'):t(cur==='discover'?'discover':cur)}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
@@ -137,8 +142,8 @@ function renderCurrent(){
 function applyLang(){
  document.documentElement.lang=lang;document.documentElement.dir=RTL.includes(lang)?'rtl':'ltr';
  $('#langBtn').textContent='🌐 '+lang.toUpperCase();
- $('#nav').innerHTML=TABS.map(k=>`<button data-t="${k}" class="${(SUB[cur]||cur)===k?'on':''}">${I[k]}<span>${t(k)}</span></button>`).join('');
- $('#locate').setAttribute('aria-label',t('locate'));$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
+ $('#nav').innerHTML=TABS.map(k=>{const on=(SUB[cur]||cur)===k;return `<button data-t="${k}" class="${on?'on':''}"${on?' aria-current="page"':''}>${I[k]}<span>${t(k)}</span></button>`}).join('');
+ $('#locate').setAttribute('aria-label',t('locate'));$('#back').setAttribute('aria-label',t('back'));$('#rtClose').setAttribute('aria-label',t('close'));$('#pm').setAttribute('aria-label',t('mosque'));$('#nav').setAttribute('aria-label',t('navLabel'));$('#tNext').textContent=t('nextPrayer');$('#tQibla').textContent=t('qibla');
  $('#storiesNote').textContent=t('storiesNote');$('#newRdv').textContent=t('newRdv');
  setTitle();fillPm();renderList();loadTimes();renderStories();renderRole();renderRdv();renderCurrent();renderStreakBadge();
  $('#back').textContent=RTL.includes(lang)?'→':'←';
@@ -151,6 +156,14 @@ $('#sheet').addEventListener('click',e=>{const c=e.target.closest('[data-l]');if
 $('#langBtn').onclick=pickLang;
 $('#meBtn').onclick=()=>go('account');
 $('#scrim').onclick=()=>$('#sheet').classList.remove('on'); // toucher en dehors ferme la fenêtre
+// fenêtre du bas accessible : hors d'atteinte quand elle est fermée, focus dedans à l'ouverture, rendu au bouton d'origine à la fermeture
+let sheetBack=null;
+new MutationObserver(()=>{
+ const s=$('#sheet'),on=s.classList.contains('on');
+ if(on&&s.inert){s.inert=false;sheetBack=document.activeElement;const h=s.querySelector('h2');s.setAttribute('aria-label',h?h.textContent:'');const f=s.querySelector('button,select,input,a[href]');if(f)setTimeout(()=>f.focus({preventScroll:true}),60)}
+ else if(!on&&!s.inert){s.inert=true;if(sheetBack&&document.contains(sheetBack))sheetBack.focus({preventScroll:true});sheetBack=null}
+}).observe($('#sheet'),{attributes:true,attributeFilter:['class']});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#viewer').classList.contains('on'))return closeStory();if($('#sheet').classList.contains('on'))$('#sheet').classList.remove('on')});
 
 /* ---------- carte (style navigation) ---------- */
 let map,pins={},userMk,routeLines=[],selected=null,watchId=null;
@@ -169,16 +182,17 @@ function initMap(){
 function renderList(){renderCards()}
 function renderCards(){
  const l=MOSQUEES.map(m=>({...m,d:dist(pos,m)})).sort((a,b)=>a.d-b.d);
- $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><div class="row"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${m.d.toFixed(1)} km</div></div>
+ // carte mosquée : 2 groupes clairs — « y aller » (itinéraire, Waze, Maps) puis « la mosquée » (covoiturage, sa page)
+ $('#cards').innerHTML=l.map(m=>`<div class="mcard ${m.id===selected?'sel':''}" data-id="${m.id}"><button class="mhead row" data-act="sel" aria-label="${esc(m.nom)}"><div class="ico" style="background:${m.color}">${I.dome}</div><div class="grow"><b>${esc(m.nom)}</b><div class="small">${esc(m.adr)}</div></div><div class="small">${fmtKm(m.d)}</div></button>
  <div class="acts"><button class="btn" data-act="route">${t('route')}</button><a class="btn ghost" target="_blank" rel="noopener" href="https://waze.com/ul?ll=${m.lat},${m.lng}&navigate=yes">Waze</a><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=driving">Maps</a></div>
- <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="page">${t('pageShort')}</button><button class="chip" data-act="info">Infos</button></div></div>`).join('')+`<div class="mcard addMq"><b>${t('notListed')}</b><button class="btn" data-act="join">${t('joinBtn')}</button></div>`;
+ <div class="more"><button class="chip" data-act="cov">${t('carpool')}</button><button class="chip" data-act="page">${t('mosquePage')}</button></div></div>`).join('')+`<div class="mcard addMq"><b>${t('notListed')}</b><button class="btn" data-act="join">${t('joinBtn')}</button></div>`;
 }
 $('#cards').onclick=e=>{
  const c=e.target.closest('.mcard');if(!c)return;const id=+c.dataset.id,a=e.target.closest('[data-act]');
  if(a&&a.dataset.act==='join')return go('join');
  if(!c.dataset.id)return;
- if(!a)return selectMosque(id,true);
- if(a.dataset.act==='route')showRoute(id);else if(a.dataset.act==='cov')newRdvSheet(id);else if(a.dataset.act==='info')openMosque(id);else if(a.dataset.act==='page')openMosquePage(id);
+ if(!a||a.dataset.act==='sel')return selectMosque(id,true);
+ if(a.dataset.act==='route')showRoute(id);else if(a.dataset.act==='cov')newRdvSheet(id);else if(a.dataset.act==='page')openMosquePage(id);
 };
 function selectMosque(id,fromCard){
  selected=id;const m=mq(id);
@@ -195,22 +209,14 @@ async function showRoute(id){
   const j=await r.json(),rt=j.routes[0],pts=rt.geometry.coordinates.map(c=>[c[1],c[0]]);
   routeLines=[L.polyline(pts,{color:'#fff',weight:10,opacity:.95}).addTo(map),L.polyline(pts,{color:'#0B8F7A',weight:6}).addTo(map)];
   map.fitBounds(routeLines[1].getBounds(),{paddingTopLeft:[40,90],paddingBottomRight:[40,260]});
-  $('#rtTime').textContent=t('routeInfo',{m:Math.max(1,Math.round(rt.duration/60)),d:(rt.distance/1000).toFixed(1)});
+  $('#rtTime').textContent=t('routeInfo',{m:Math.max(1,Math.round(rt.duration/60)),d:fmtKm(rt.distance/1000).replace(' km','')});
   $('#rtSub').textContent=m.nom+' · '+(from===pos&&hasFix?t('fromYou'):t('fromCenter'));
   $('#routeBar').classList.add('on');
- }catch(e){toast(t('routeFail'))}
+ }catch(e){toast(t('routeFail'),{label:t('retry'),action:()=>showRoute(id)})}
 }
 function clearRoute(){routeLines.forEach(l=>map.removeLayer(l));routeLines=[];$('#routeBar').classList.remove('on')}
 $('#rtClose').onclick=clearRoute;
-function openMosque(id){
- const m=mq(id);
- $('#sheet').innerHTML=`<div class="row"><div class="ico">${I.dome}</div><div class="grow"><h2>${esc(m.nom)}</h2><div class="small">${dist(pos,m).toFixed(1)} km</div></div></div><p class="muted" style="margin:12px 0 4px">${esc(m.adr)}</p>${m.site?`<p style="margin-bottom:4px"><a href="${m.site}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">${t('site')}</a></p>`:''}${MAWAQIT[m.id]?`<p style="margin-bottom:4px"><a href="https://mawaqit.net/en/m/${MAWAQIT[m.id].slug}" target="_blank" rel="noopener" style="color:var(--brand);font-weight:700">Mawaqit</a></p>`:''}<p class="small" style="margin-bottom:12px">${t('src_'+m.src)}</p>
- <button class="btn" id="cov">${t('carpool')}</button><div style="height:8px"></div><button class="btn ghost" id="mpg">${t('mosquePage')}</button><div style="height:8px"></div><button class="btn ghost" id="cl">${t('close')}</button>`;
- $('#sheet').classList.add('on');
- $('#cl').onclick=()=>$('#sheet').classList.remove('on');
- $('#cov').onclick=()=>newRdvSheet(id);
- $('#mpg').onclick=()=>openMosquePage(id);
-}
+// (l'ancienne fiche « Infos » est fusionnée dans la page de la mosquée : adresse, site, Mawaqit, source des horaires)
 let hasFix=false;
 function onFix(p,first){
  pos={lat:p.coords.latitude,lng:p.coords.longitude};store.set('pos',pos);hasFix=true;
@@ -252,7 +258,8 @@ function prieres(){
  let nxt=KEYS.find(k=>mins(horaires[k])>c),diff;
  if(nxt)diff=mins(horaires[nxt])-c;else{nxt='fajr';diff=1440-c+mins(horaires.fajr)}
  $('#nextName').textContent=t(nxt);
- $('#nextIn').textContent=t('inT',{h:Math.floor(diff/60),m:String(diff%60).padStart(2,'0')})+' · '+horaires[nxt];
+ $('#nextIn').textContent=inTime(diff)+' · '+horaires[nxt];
+ renderPmNote();
  const m=prayMosque?mq(prayMosque):null;
  $('#times').innerHTML=KEYS.map(k=>`<div class="${k===nxt?'cur':''}"><span>${t(k)}</span><span dir="ltr">${horaires[k]}${iqama?' <span class="small">· '+t('iqama')+' '+iqama[k]+'</span>':''}</span></div>`).join('')
   +(m&&m.src==='mawaqit'?`<div><span>${t('jumua')}</span><span dir="ltr">${MAWAQIT[m.id].jumua}</span></div>`:'')
@@ -262,8 +269,20 @@ function prieres(){
  const b=(Math.atan2(y,x)*180/Math.PI+360)%360;
  $('#needle').style.transform=`rotate(${b}deg)`;$('#qibla').textContent=t('deg',{d:Math.round(b)});
 }
+// « dans 13 min » (et non « dans 0 h 13 min ») ; « dans 2 h 05 min » au-delà d'une heure
+const inTime=diff=>{const h=Math.floor(diff/60),m=diff%60;return h?t('inT',{h,m:String(m).padStart(2,'0')}):t('inM',{m})};
 function fillPm(){$('#pm').innerHTML='<option value="0">'+t('cityTlse')+'</option>'+MOSQUEES.map(m=>`<option value="${m.id}">${esc(m.nom)}</option>`).join('');$('#pm').value=String(prayMosque)}
-$('#pm').onchange=e=>{prayMosque=+e.target.value;store.set('pm',prayMosque);loadTimes()};
+$('#pm').onchange=e=>{prayMosque=+e.target.value;tempPm=false;store.set('pm',prayMosque);loadTimes()};
+// depuis la page d'une mosquée : on montre SES horaires sans changer la mosquée enregistrée (sauf si on le demande)
+let tempPm=false;
+function showMosqueTimes(id){prayMosque=id;tempPm=id!==store.get('pm',0);fillPm();loadTimes();go('prayers')}
+function renderPmNote(){
+ const b=$('#pmNote');if(!b)return;
+ if(!tempPm){b.innerHTML='';return}
+ const saved=store.get('pm',0),sm=saved?mq(saved):null;
+ b.innerHTML=`<div class="pmNote"><span class="grow">${t('pmTemp',{m:sm?esc(sm.nom):t('cityTlse')})}</span><button class="chip" id="pmKeep">${t('pmKeep')}</button></div>`;
+ $('#pmKeep').onclick=()=>{store.set('pm',prayMosque);tempPm=false;renderPmNote();toast(t('saved'))};
+}
 
 /* ---------- rôle ---------- */
 let role=store.get('role','fidele');
@@ -278,7 +297,8 @@ function renderRole(){
 let seen=store.get('seen',{});STORIES[99]=store.get('st99',[]);
 function renderStories(){
  const list=MOSQUEES.concat(role==='mosquee'||STORIES[99].length?[DEMO]:[]);
- const nm=m=>m.nom.replace('Mosquée ','').replace('Grande ','').replace(/\(.*\)/,'').trim();
+ // nom court lisible : « Mosquée du Mirail » → « Mirail » (et non « du Mirail »)
+ const nm=m=>m.nom.replace('Mosquée ','').replace('Grande ','').replace(/\(.*\)/,'').trim().replace(/^(de la |de l'|du |des |d'|de )/i,'').replace(/^./,c=>c.toUpperCase());
  $('#storyRow').innerHTML=list.map(m=>{const has=(STORIES[m.id]||[]).length>0;return `<button class="story ${seen[m.id]||!has?'seen':''}" data-id="${m.id}"><div class="ring"><div class="in"><span style="background:${m.color}">${I.dome}</span></div></div><p>${esc(nm(m))}</p></button>`}).join('');
 }
 $('#storyRow').onclick=e=>{const b=e.target.closest('.story');if(!b)return;const id=+b.dataset.id;if(!(STORIES[id]||[]).length)return toast(t('noStory'));playStory(id)};
@@ -288,7 +308,7 @@ function playStory(id,i=0){
  if(i>=L.length){closeStory();return}
  seen[id]=1;store.set('seen',seen);
  const v=$('#viewer');v.style.background=m.color;v.classList.add('on');
- v.innerHTML=`<div class="bars">${L.map((_,j)=>`<i><b style="width:${j<i?100:0}%"></b></i>`).join('')}</div><div class="row"><b>${esc(m.nom)}</b></div><button class="x" aria-label="close">×</button><div class="body">${esc(L[i])}</div>`;
+ v.innerHTML=`<div class="bars">${L.map((_,j)=>`<i><b style="width:${j<i?100:0}%"></b></i>`).join('')}</div><div class="row"><b>${esc(m.nom)}</b></div><button class="x" aria-label="${esc(t('close'))}">×</button><div class="body">${esc(L[i])}</div>`;
  v.querySelector('.x').onclick=closeStory;
  v.onclick=e=>{if(e.target.closest('.x'))return;clearTimeout(tm);playStory(id,i+1)};
  const bar=v.querySelectorAll('.bars b')[i];bar.style.transition='width 4s linear';requestAnimationFrame(()=>requestAnimationFrame(()=>bar.style.width='100%'));
@@ -306,7 +326,7 @@ $('#newRdv').onclick=()=>newRdvSheet();
 /* ---------- Plus ---------- */
 function renderMore(){
  const P=getProfile();
- const items=[['cours','book','coursD','#0A7EA4'],['family','family','familyD','#C2610C'],['discover','book','discoverD','#0B8F7A'],['qr','qr','qrD','#7B3FB5'],['join','dome','joinD','#2F6FE4'],['settings','gear',null,'#4A5A6A']];
+ const items=[['stories','stories','storiesD','#9B4E0A'],['cours','cal','coursD','#086B8B'],['family','family','familyD','#B4434B'],['discover','book','discoverD','#09705F'],['qr','qr','qrD','#7B3FB5'],['join','dome','joinD','#285EC2'],['settings','gear',null,'#4A5A6A']];
  $('#moreBody').innerHTML=`<button class="meCard" data-go="account"><div class="emk big">${P.emoji?esc(P.emoji):I.user}</div><div class="grow"><b>${esc(P.pseudo||t('account'))}</b><div class="small">${t('accountD')}</div></div><i class="chev"></i></button>
  <div class="mgrid">${items.map(([k,ic,d,c])=>`<button class="mtile" data-go="${k}"><div class="ico" style="background:${c}">${I[ic]}</div><b>${t(k)}</b>${d?`<div class="small">${t(d)}</div>`:''}</button>`).join('')}</div>`;
 }
@@ -349,25 +369,30 @@ function renderQr(){
 }
 
 /* ---------- Réglages ---------- */
-const prefs=store.get('prefs',{reminders:true,notifs:true,share:false});
+// Réglages : les interrupteurs pilotent les MÊMES réglages que l'écran Compte (avant, ils n'avaient aucun effet).
+// « Notifications des stories » retiré : rien ne l'utilisait.
 let spent=store.get('spent',0);
 function renderSettings(){
- const m=role==='mosquee';
+ const m=role==='mosquee',P=getProfile();
+ const sw=(id,on,label,desc)=>`<div class="set"><div class="grow"><span>${label}</span>${desc?`<div class="small">${desc}</div>`:''}</div><button class="sw ${on?'on':''}" id="${id}" role="switch" aria-checked="${!!on}" aria-label="${esc(label)}"></button></div>`;
  $('#settingsBody').innerHTML=`<div class="card row"><div class="ico" style="width:56px;height:56px">${I.dome}</div><div class="grow"><h2>${m?t('roleMosque'):t('roleFidele')}</h2></div></div>`+
- ['reminders','notifs','share'].map(k=>`<div class="set"><span>${t(k)}</span><button class="sw ${prefs[k]?'on':''}" data-k="${k}"></button></div>`).join('')+
+ sw('stNotif',P.prayNotif,t('prayNotif'),t('prayNotifD'))+sw('stShare',P.share,t('share'),t('sharePosD'))+
  `<div class="set"><span>${t('language')}</span><button class="chip" id="sl">${LANGS[lang]}</button></div><div class="set"><span>${t('spent')}</span><span class="small" id="spent">${Math.floor(spent/60)} min</span></div>
  <div style="height:16px"></div><div class="card"><div class="small" style="margin-bottom:8px">${t('demo')}</div><button class="btn ghost" id="roleBtn">${m?t('toFidele'):t('toMosque')}</button></div>`;
- $$('#settingsBody .sw').forEach(s=>s.onclick=()=>{prefs[s.dataset.k]=!prefs[s.dataset.k];store.set('prefs',prefs);s.classList.toggle('on',prefs[s.dataset.k])});
+ $('#stNotif').onclick=async()=>{if(!P.prayNotif){const ok=await askNotifPermission();if(!ok)return toast(t('notifRefused'))}P.prayNotif=!P.prayNotif;saveProfile();renderSettings()};
+ $('#stShare').onclick=()=>{P.share=!P.share;if(!P.share)P.at=0;saveProfile();renderSettings();if(P.share)locateMe()};
  $('#sl').onclick=pickLang;
  $('#roleBtn').onclick=()=>{role=m?'fidele':'mosquee';store.set('role',role);renderRole();renderSettings()};
 }
-setInterval(()=>{spent++;store.set('spent',spent);const e=$('#spent');if(e)e.textContent=Math.floor(spent/60)+' min'},1000);
+// temps passé : compté chaque seconde, enregistré toutes les 30 s seulement (moins d'écritures sur le téléphone)
+setInterval(()=>{spent++;if(spent%30===0)store.set('spent',spent);const e=$('#spent');if(e)e.textContent=Math.floor(spent/60)+' min'},1000);
+addEventListener('pagehide',()=>store.set('spent',spent));
 
 /* ---------- démarrage ---------- */
 $('#streakBtn').onclick=()=>go('prayers');
-initRappels();initGender();initCours();initMap();applySectionColor('map');applyLang();renderStreakBadge();loadTimes();setInterval(prieres,30000);
+initRappels();initGender();initCours();initMap();applySectionColor('prayers');applyLang();renderStreakBadge();setInterval(prieres,30000); // applyLang charge déjà les horaires
 initFeatures2();
-go('rappels'); // ouverture directement sur les vidéos (comme TikTok)
+go('prayers'); // ouverture sur la prochaine prière (critique du 19/11/2026) ; les vidéos restent dans l'onglet Rappels
 readHash(); // QR code d'une mosquée : #mosquee=<id> ouvre sa page
 checkPrayerTime();
 </script>

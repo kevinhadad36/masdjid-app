@@ -4,18 +4,37 @@
    Prototype : données fictives, rien n'est envoyé, aucune base de données. */
 
 /* ---------- couleurs par section (comme Snap : une couleur par fonction) ---------- */
+// [fond des boutons, fond appuyé, texte coloré en mode sombre]
+// Contrastes vérifiés (critique Impeccable du 19/11/2026) : texte blanc sur le fond ≥ 6:1,
+// texte coloré ≥ 4,5:1 sur fond clair ET sur fond sombre (--brand-tx).
 const SECTION_COLORS={
- map:['#0B8F7A','#08705F'],      // vert : carte
- prayers:['#0A7EA4','#07627F'],  // turquoise : prières
- rappels:['#7B3FB5','#62308F'],  // violet : vidéos
- stories:['#C2610C','#9C4C09'],  // orange : actualités des mosquées
- rdv:['#2F6FE4','#2556B6'],      // bleu : messages / covoiturage
- more:['#4A5A6A','#38454F']
+ map:['#09705F','#07594C','#559C91'],      // vert : carte
+ prayers:['#086B8B','#075670','#5599AF'],  // turquoise : prières
+ rappels:['#7B3FB5','#623291','#A77ECD'],  // violet : vidéos
+ stories:['#9B4E0A','#7C3E08','#BA8556'],  // orange : actualités des mosquées
+ rdv:['#285EC2','#204B9B','#6B90D5'],      // bleu : trajets / covoiturage
+ more:['#4A5A6A','#3B4855','#88929D']
 };
+const darkNow=()=>{const r=document.documentElement.dataset.theme;return r==='dark'||(r!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)};
+let _secTab='map';
 function applySectionColor(tab){
+ _secTab=tab;
  const c=SECTION_COLORS[tab]||SECTION_COLORS.map,r=document.documentElement.style;
- r.setProperty('--brand',c[0]);r.setProperty('--brand-d',c[1]);
+ r.setProperty('--brand',c[0]);r.setProperty('--brand-d',c[1]);r.setProperty('--brand-tx',darkNow()?c[2]:c[0]);
  const m=document.querySelector('meta[name=theme-color]');if(m)m.content=c[0];
+}
+// le téléphone passe en sombre / clair pendant l'utilisation : on suit
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{applySectionColor(_secTab);const mp=document.getElementById('map');if(mp)mp.classList.toggle('dark-tiles',darkNow())})}catch(e){}
+
+/* ---------- messages d'erreur sous le champ concerné ---------- */
+function fieldErr(sel,msg){
+ const el=typeof sel==='string'?$(sel):sel;if(!el)return toast(msg);
+ const at=(el.type==='checkbox'&&el.closest('label'))||el;let e=at.nextElementSibling;
+ if(!e||!e.classList.contains('ferr')){e=document.createElement('div');e.className='ferr';e.setAttribute('role','alert');at.after(e)}
+ e.id=(el.id||'f')+'Err';e.textContent=msg;
+ el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby',e.id);
+ try{el.focus({preventScroll:false})}catch(x){}
+ el.addEventListener('input',()=>{el.removeAttribute('aria-invalid');el.removeAttribute('aria-describedby');e.remove()},{once:true});
 }
 
 /* ---------- icônes ---------- */
@@ -81,14 +100,14 @@ let rapFilter='short',_rap=null;
 const rapState=()=>_rap||(_rap=store.get('rap',{likes:{},cmts:{}}));
 function renderRappels(){
  const tabs=$('#rapTabs'),feed=$('#feed');if(!tabs||!feed)return;
- tabs.innerHTML=[['short','fShort'],['long','fLong'],['live','fLive']].map(([k,l])=>`<button class="chip ${rapFilter===k?'on':''}" data-f="${k}">${t(l)}</button>`).join('');
+ tabs.innerHTML=[['short','fShort'],['long','fLong'],['live','fLive']].map(([k,l])=>`<button class="chip ${rapFilter===k?'on':''}" data-f="${k}" aria-pressed="${rapFilter===k}">${t(l)}</button>`).join('');
  const S=rapState(),list=RAPPELS.filter(r=>r.type===rapFilter);
  feed.scrollTop=0;
  feed.innerHTML=list.length?list.map(r=>{
   const m=mq(r.m),liked=!!S.likes[r.id],nc=(S.cmts[r.id]||[]).length;
   return `<article class="clip" data-id="${r.id}" style="background:linear-gradient(165deg,${m.color},#101418 85%)">
    <span class="demoTag">${t('demoTag')}</span>${r.type==='live'?`<span class="liveBadge">${t('live')}</span>`:''}
-   <button class="playBig" data-play aria-label="play">▶</button>
+   <button class="playBig" data-play aria-label="${esc(t('play'))}">▶</button>
    <div class="clipBody"><div class="who">${esc(m.nom)}${r.dur?` · ${r.dur}`:''}</div><p class="quote">${t(r.q)}</p><div class="small" style="color:#fff;opacity:.85">${t(r.s)}</div></div>
    <div class="rail"><div class="clipAv" style="background:${m.color}">${I.dome}</div>
     <button class="railBtn ${liked?'on':''}" data-like aria-label="${t('like')}" aria-pressed="${liked}">${ICON_HEART}${liked?'<span>1</span>':''}</button>
@@ -144,7 +163,8 @@ function renderAccount(){
   body.innerHTML=`<div class="card row"><div class="ico" style="width:56px;height:56px">${ICON_USER}</div><div class="grow"><h2>${t('acHello')}</h2><div class="muted" dir="ltr">${esc(maskContact(a))}</div></div></div>
   ${profileHtml()}${prayerPrefsHtml()}
   <button class="btn ghost" id="acOut">${t('acOut')}</button><p class="small" style="margin-top:12px">${t('acNote')}</p>`;
-  $('#acOut').onclick=()=>{_acc=null;store.set('account',null);renderAccount()};bindProfile();return;
+  $('#acOut').onclick=()=>{const old=_acc;_acc=null;store.set('account',null);renderAccount();
+   toast(t('acOutDone'),{action:()=>{_acc=old;store.set('account',old);if(cur==='account')renderAccount()}})};bindProfile();return;
  }
  body.innerHTML=`<label>${t('acKind')}</label><div class="chips" style="margin:6px 0 12px"><button class="chip ${acKind==='email'?'on':''}" data-ak="email">${t('acEmail')}</button><button class="chip ${acKind==='phone'?'on':''}" data-ak="phone">${t('acPhone')}</button></div>
  <input class="field" id="acVal" dir="ltr" autocomplete="${acKind==='email'?'email':'tel'}" inputmode="${acKind==='email'?'email':'tel'}" placeholder="${esc(t('acPh_'+acKind))}">
@@ -152,7 +172,7 @@ function renderAccount(){
  body.querySelectorAll('[data-ak]').forEach(b=>b.onclick=()=>{acKind=b.dataset.ak;renderAccount()});
  $('#acOk').onclick=()=>{
   const v=$('#acVal').value.trim();
-  if(!(acKind==='email'?validEmail(v):validPhone(v)))return toast(t('acBad'));
+  if(!(acKind==='email'?validEmail(v):validPhone(v)))return fieldErr('#acVal',t(acKind==='email'?'acBad_email':'acBad_phone'));
   _acc={kind:acKind,value:v};store.set('account',_acc);toast(t('acSaved'));renderAccount();
  };
 }
@@ -230,10 +250,13 @@ function initCours(){
   const c=e.target.closest('[data-cc]');
   if(c){_pendingRdv=[+c.dataset.cmos,'course:'+c.dataset.cc];return newRdvSheet(_pendingRdv[0],_pendingRdv[1])}
   const d=e.target.closest('[data-cdel]');
-  if(d){const L=myCours().filter(x=>x.id!==d.dataset.cdel);_cours=L;store.set('cours99',L);return renderCours()}
+  if(d){const old=myCours().slice(),L=old.filter(x=>x.id!==d.dataset.cdel);_cours=L;store.set('cours99',L);renderCours();
+   return toast(t('cDeleted'),{action:()=>{_cours=old;store.set('cours99',old);if(cur==='cours')renderCours()}})}
   if(e.target.closest('#cAdd')){
    const title=$('#cTitle').value.trim(),h=$('#cTime').value,day=+$('#cDay').value,a=$('#cAud').value;
-   if(!title||title.length>60||!/^\d{2}:\d{2}$/.test(h)||!(day>=1&&day<=7)||!['all','men','women'].includes(a))return toast(t('cBad'));
+   if(!title||title.length>60)return fieldErr('#cTitle',t('cNeedTitle'));
+   if(!/^\d{2}:\d{2}$/.test(h))return fieldErr('#cTime',t('cNeedTime'));
+   if(!(day>=1&&day<=7)||!['all','men','women'].includes(a))return toast(t('cBad'));
    const L=myCours().concat([{id:'u'+Date.now(),d:day,h,a,title}]);_cours=L;store.set('cours99',L);toast(t('cAdded'));renderCours();
   }
  };

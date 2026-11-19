@@ -3,21 +3,25 @@
 :root{
  --bg:#F6F5F1;--surf:#FFFFFF;--field:#EEECE6;--line:#E5E2DA;
  --tx:#14181A;--tx2:#4C5357;--tx3:#687076;
- --brand:#0B8F7A;--brand-d:#08705F;--dark:#14181A;--gold:#F5B301;--gold-tx:#3A2A00;
+ --brand:#09705F;--brand-d:#07594C;--brand-tx:#09705F;--dark:#14181A;--gold:#F5B301;--gold-tx:#3A2A00;--err:#B42318;
  --shadow:0 1px 2px rgba(20,24,26,.05),0 6px 20px rgba(20,24,26,.06);
  --r:22px;--ff:"Nunito Sans",system-ui,sans-serif;
  --star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72' fill='none' stroke='white' stroke-width='1.2'%3E%3Crect x='20' y='20' width='32' height='32'/%3E%3Crect x='20' y='20' width='32' height='32' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='7'/%3E%3Cpath d='M0 36h13M59 36h13M36 0v13M36 59v13'/%3E%3C/svg%3E");
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){
  --bg:#0E1113;--surf:#181C1F;--field:#242A2E;--line:#2C3337;
- --tx:#F2F4F5;--tx2:#B8BEC3;--tx3:#8E969D;--brand:#18B59D;--brand-d:#139A85;
+ --tx:#F2F4F5;--tx2:#B8BEC3;--tx3:#8E969D;--brand-tx:#559C91;--err:#FF8A7A;
  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
 }}
+/* mode sombre forcé (data-theme="dark"), mêmes valeurs */
+:root[data-theme=dark]{--bg:#0E1113;--surf:#181C1F;--field:#242A2E;--line:#2C3337;--tx:#F2F4F5;--tx2:#B8BEC3;--tx3:#8E969D;--brand-tx:#559C91;--err:#FF8A7A;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25)}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font-family:var(--ff);background:var(--bg);color:var(--tx);font-size:16px;line-height:24px;font-weight:500;display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
 button,a,select,input{touch-action:manipulation}
-:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 55%,transparent);outline-offset:2px}
+:focus-visible{outline:3px solid var(--brand-tx);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--brand) 28%,transparent)}
+/* --brand = fond des boutons (texte blanc) ; --brand-tx = texte et contours colorés, lisibles en clair comme en sombre */
 #app{width:100%;max-width:480px;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
 @media(min-width:520px){body{background:color-mix(in srgb,var(--bg) 88%,#000)}#app{box-shadow:0 0 60px rgba(0,0,0,.18)}}
 
@@ -26,7 +30,7 @@ header{padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;alig
 header h1{font-size:26px;line-height:32px;font-weight:800;letter-spacing:-.02em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #back{background:var(--surf);border:1px solid var(--line);border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;color:var(--tx);display:none;flex:none}
 #langBtn{background:var(--surf);border:1px solid var(--line);border-radius:1000px;height:36px;padding:0 12px;font:700 13px var(--ff);color:var(--tx);cursor:pointer;flex:none}
-#meBtn{width:38px;height:38px;border-radius:50%;border:2px solid var(--brand);background:var(--surf);display:grid;place-items:center;font-size:19px;line-height:1;cursor:pointer;flex:none;padding:0;color:var(--brand);transition:border-color .25s}
+#meBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--brand-tx);background:var(--surf);display:grid;place-items:center;font-size:19px;line-height:1;cursor:pointer;flex:none;padding:0;color:var(--brand-tx);transition:border-color .25s}
 #meBtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #app.sub #langBtn,#app.sub #streakBtn{display:none}
 
@@ -39,10 +43,10 @@ main{flex:1;overflow-y:auto;position:relative;overscroll-behavior:contain}
 
 /* --- barre du bas --- */
 nav{display:flex;border-top:1px solid var(--line);background:var(--surf);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:2}
-nav button{flex:1;min-width:0;background:none;border:0;padding:0;color:var(--tx3);font:700 11.5px/14px var(--ff);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav button{flex:1;min-width:0;background:none;border:0;padding:0;color:var(--tx2);font:700 12.5px/15px var(--ff);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
 nav button svg{box-sizing:content-box;width:24px;height:24px;padding:4px 16px;border-radius:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:background .2s,transform .15s}
 nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-nav button.on{color:var(--brand)}
+nav button.on{color:var(--brand-tx)}
 nav button.on svg{background:color-mix(in srgb,var(--brand) 14%,transparent);stroke-width:2.1}
 nav button:active svg{transform:scale(.9)}
 
@@ -62,8 +66,8 @@ nav button:active svg{transform:scale(.9)}
 .row{display:flex;align-items:center;gap:12px}
 .grow{flex:1;min-width:0}
 h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
-.badge{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-size:12px;font-weight:700;flex:none}
-.badge svg{width:14px;height:14px;fill:var(--brand)}
+.badge{display:inline-flex;align-items:center;gap:4px;color:var(--brand-tx);font-size:12px;font-weight:700;flex:none}
+.badge svg{width:14px;height:14px;fill:var(--brand-tx)}
 
 /* --- carte --- */
 #s-map{padding:0}
@@ -81,14 +85,15 @@ h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
 @keyframes pulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.2);opacity:0}}
 #bottom{position:absolute;left:0;right:0;bottom:0;z-index:500;pointer-events:none;display:flex;flex-direction:column;gap:10px;padding-bottom:12px}
 #bottom>*{pointer-events:auto}
-.fab{align-self:flex-end;margin-inline-end:12px;width:50px;height:50px;border-radius:50%;border:0;background:var(--surf);color:var(--brand);box-shadow:0 2px 12px rgba(0,0,0,.28);display:grid;place-items:center;cursor:pointer;transition:transform .12s}
+.fab{align-self:flex-end;margin-inline-end:12px;width:50px;height:50px;border-radius:50%;border:0;background:var(--surf);color:var(--brand-tx);box-shadow:0 2px 12px rgba(0,0,0,.28);display:grid;place-items:center;cursor:pointer;transition:transform .12s}
 .fab:active{transform:scale(.92)}
 .fab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 12px 6px;scrollbar-width:none}
 #cards::-webkit-scrollbar{display:none}
 .mcard{flex:none;width:min(86%,340px);scroll-snap-align:center;background:var(--surf);border-radius:24px;padding:14px;box-shadow:0 6px 22px rgba(0,0,0,.24);border:2px solid transparent;transition:border-color .2s}
-.mcard.sel{border-color:var(--brand)}
+.mcard.sel{border-color:var(--brand-tx)}
 .mcard b{line-height:20px;display:block}
+.mhead{width:100%;background:none;border:0;padding:0;margin:0;text-align:start;font:inherit;color:inherit;cursor:pointer;border-radius:14px}
 .mcard .acts{display:flex;gap:8px;margin-top:12px}
 .mcard .acts .btn{min-height:42px;padding:9px 12px;font-size:14px}
 .mcard .acts a.btn{text-decoration:none;text-align:center;flex:none;width:auto;display:grid;place-items:center}
@@ -114,7 +119,7 @@ h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
 .times{padding:8px}
 .times div{display:flex;justify-content:space-between;align-items:center;padding:12px 12px;border-radius:14px;font-weight:700;font-variant-numeric:tabular-nums}
 .times div+div{margin-top:2px}
-.times div.cur{color:var(--brand);background:color-mix(in srgb,var(--brand) 11%,transparent);font-weight:800}
+.times div.cur{color:var(--brand-tx);background:color-mix(in srgb,var(--brand) 11%,transparent);font-weight:800}
 .times>.small{padding:10px 12px 6px!important;font-weight:600!important}
 #needle{width:64px;height:64px;transition:transform .3s;flex:none}
 
@@ -147,7 +152,11 @@ h2{font-size:19px;line-height:25px;font-weight:800;letter-spacing:-.01em}
 select,.field{width:100%;background:var(--surf);border:1.5px solid var(--line);border-radius:16px;min-height:50px;padding:12px 16px;font:600 16px/22px var(--ff);color:var(--tx);margin:6px 0 12px;transition:border-color .15s,box-shadow .15s;outline:0}
 select{-webkit-appearance:none;appearance:none;padding-inline-end:42px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237A8288' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6 5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
 [dir=rtl] select{background-position:left 16px center}
-select:focus,.field:focus{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 16%,transparent)}
+select:focus,.field:focus{border-color:var(--brand-tx);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand-tx) 22%,transparent)}
+/* erreur affichée sous le champ concerné */
+.field[aria-invalid=true],select[aria-invalid=true]{border-color:var(--err)}
+.ferr{color:var(--err);font-size:14px;line-height:19px;font-weight:700;margin:-6px 0 12px}
+.ferr::before{content:"! ";font-weight:800}
 .field::placeholder{color:var(--tx3);font-weight:500}
 .card select,.card .field,.sheet select,.sheet .field{background-color:var(--bg)}
 label{font-size:13px;font-weight:700;color:var(--tx2)}
@@ -162,8 +171,10 @@ label{font-size:13px;font-weight:700;color:var(--tx2)}
 .sheet.on{transform:none}
 #scrim{position:absolute;inset:0;background:rgba(8,12,14,.48);z-index:790;opacity:0;pointer-events:none;transition:opacity .25s}
 .sheet.on+#scrim{opacity:1;pointer-events:auto}
-.toast{position:absolute;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:rgba(20,24,26,.94);color:#fff;padding:11px 18px;border-radius:1000px;font-size:14px;line-height:19px;font-weight:700;z-index:960;opacity:0;transition:.22s;pointer-events:none;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast{position:absolute;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:rgba(20,24,26,.96);color:#fff;padding:12px 18px;border-radius:24px;font-size:15px;line-height:20px;font-weight:700;z-index:960;opacity:0;visibility:hidden;transition:opacity .22s,transform .22s,visibility 0s .22s;pointer-events:none;width:max-content;max-width:calc(100% - 32px);text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:12px}
+.toast.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .22s,transform .22s}
+.toast.act{pointer-events:auto;text-align:start;padding-inline-end:8px}
+.toast button{flex:none;border:0;border-radius:1000px;background:#fff;color:#14181A;font:800 14px/18px var(--ff);min-height:40px;padding:8px 16px;cursor:pointer}
 .step{display:flex;gap:14px;align-items:flex-start}
 .step .n{width:36px;height:36px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;display:grid;place-items:center;flex:none}
 .qrbox{background:#fff;color:#16191C;border-radius:24px;padding:24px;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow)}
@@ -201,8 +212,8 @@ label{font-size:13px;font-weight:700;color:var(--tx2)}
 .clip.empty{align-items:center;justify-content:center;background:#0C0F11;text-align:center;padding:24px;color:rgba(255,255,255,.75);font-weight:700}
 .clip .who{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
 .clip .quote{font-size:25px;line-height:32px;font-weight:800;letter-spacing:-.01em;margin:8px 0 6px}
-.demoTag,.liveBadge{position:absolute;top:60px;inset-inline-start:18px;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.06em;z-index:2}
-.demoTag{background:rgba(255,255,255,.16);color:rgba(255,255,255,.9)}.liveBadge{background:#E0263C;inset-inline-start:auto;inset-inline-end:18px}
+.demoTag,.liveBadge{position:absolute;top:60px;inset-inline-start:18px;font-size:12px;line-height:16px;font-weight:800;border-radius:6px;padding:2px 8px;letter-spacing:.06em;z-index:2}
+.demoTag{background:rgba(0,0,0,.55);color:#fff}.liveBadge{background:#E0263C;inset-inline-start:auto;inset-inline-end:18px}
 .playBig{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:26px;cursor:pointer;z-index:2;transition:opacity .2s,transform .12s}
 .playBig:active{transform:translate(-50%,-50%) scale(.92)}
 .clip.playing .playBig{opacity:.3}
@@ -221,8 +232,8 @@ label{font-size:13px;font-weight:700;color:var(--tx2)}
 /* --- profil : emoji sans visage + position (style Snap / Waze) --- */
 .emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:6px 0 12px}
 .emojis .emo{width:48px;height:48px;font-size:24px;transition:transform .12s}.emojis .emo:active{transform:scale(.9)}
-.emo.on{outline:3px solid var(--brand);background:var(--surf)}
-.emk{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--brand);display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.2);flex:none;color:var(--brand)}
+.emo.on{outline:3px solid var(--brand-tx);background:var(--surf)}
+.emk{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--brand-tx);display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.2);flex:none;color:var(--brand)}
 .emk svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .emk.big{width:56px;height:56px;font-size:30px}
 .emkName{position:absolute;top:46px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font:700 11px/14px var(--ff);padding:2px 8px;border-radius:8px;white-space:nowrap}
@@ -230,10 +241,10 @@ label{font-size:13px;font-weight:700;color:var(--tx2)}
 /* --- trajets --- */
 .seg{display:flex;background:var(--field);border-radius:1000px;padding:4px;margin-bottom:12px}
 .seg button{flex:1;border:0;background:none;border-radius:1000px;min-height:38px;padding:8px 4px;font:700 14px var(--ff);color:var(--tx2);cursor:pointer;transition:background .2s,color .2s}
-.seg button.on{background:var(--surf);color:var(--brand);font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.seg button.on{background:var(--surf);color:var(--brand-tx);font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 h2.sec{font-size:17px;margin:18px 0 10px}
 .trip .small{margin-top:1px}
-.tag{align-self:flex-start;font-size:11px;font-weight:800;border-radius:8px;padding:3px 8px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);white-space:nowrap}
+.tag{align-self:flex-start;font-size:12px;font-weight:800;border-radius:8px;padding:3px 8px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand-tx);white-space:nowrap}
 .tag.seek,.tag.pending{background:color-mix(in srgb,var(--gold) 26%,transparent);color:#7A5600}.tag.pending{display:inline-block;margin-top:8px}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tag.seek,:root:not([data-theme=light]) .tag.pending{color:var(--gold)}}
 .trip.seek .emk{border-color:var(--gold)}
@@ -260,10 +271,15 @@ h2.sec{font-size:17px;margin:18px 0 10px}
 .menu{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surf);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;cursor:pointer;width:100%;text-align:start;font-family:inherit;color:var(--tx);font-size:16px}
 
 /* --- page mosquée (QR code) + tuiles --- */
-.mhero{border-radius:28px;padding:22px 20px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.mhero{border-radius:28px;padding:22px 20px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:var(--shadow);background-image:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2))} /* voile léger : texte blanc lisible sur toutes les couleurs de mosquée */
 .mhero::after{content:"";position:absolute;inset:0;background-image:var(--star);opacity:.13;pointer-events:none;-webkit-mask-image:linear-gradient(100deg,transparent 35%,#000);mask-image:linear-gradient(100deg,transparent 35%,#000)}
 .mhero>*{position:relative;z-index:1}
 .mhero h2{margin-top:10px;font-size:22px;line-height:28px}
+.mheroTx{font-size:14px;line-height:19px;font-weight:600;color:#fff}
+.mlinks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.mlinks a{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border-radius:1000px;background:var(--surf);border:1px solid var(--line);color:var(--brand-tx);font-weight:700;text-decoration:none}
+.pmNote{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--gold) 18%,var(--surf));border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:18px;padding:10px 10px 10px 14px;margin:-4px 0 12px;font-size:14px;line-height:19px;font-weight:600}
+.pmNote .chip{flex:none;min-height:40px;background:var(--surf)}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .mtile{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:14px;text-align:start;font-family:inherit;font-size:16px;color:var(--tx);cursor:pointer;display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow);transition:transform .12s}
 .mtile:active{transform:scale(.97)}
@@ -277,7 +293,7 @@ h2.sec{font-size:17px;margin:18px 0 10px}
 .pbar{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;z-index:8;display:none;align-items:center;gap:10px;background:#FFD43B;color:#2A2000;border-radius:20px;padding:12px 12px 12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.45);font-size:14px;line-height:18px;font-weight:600}
 .pbar.on{display:flex;animation:pbIn .35s ease-out}
 .pbar b{display:block;font-size:16px;line-height:20px;font-weight:800}
-.pbIco{font-size:28px;line-height:1}
+.pbIco{line-height:1;flex:none}.pbIco svg{display:block;width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pbar button{border:0;border-radius:1000px;background:#2A2000;color:#FFD43B;font:800 13px var(--ff);min-height:38px;padding:9px 14px;cursor:pointer;white-space:nowrap}
 #prayBanner.on~#rapTabs{top:calc(96px + env(safe-area-inset-top))}
 #prayBanner.on~#feed .demoTag,#prayBanner.on~#feed .liveBadge{top:146px}
@@ -285,7 +301,9 @@ h2.sec{font-size:17px;margin:18px 0 10px}
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{#app{display:none!important}#printArea{display:block!important;text-align:center;font-family:sans-serif;padding:40px;color:#000}#printArea svg{width:340px;height:340px}}
-/* mode sombre : l'onglet actif reste lisible même quand la couleur de section est foncée */
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) #app:not(.immersive) nav button.on{color:color-mix(in srgb,var(--brand) 55%,#fff)}:root:not([data-theme=light]) .seg button.on{color:color-mix(in srgb,var(--brand) 55%,#fff)}}
+/* mode sombre : l'onglet actif et les textes colorés utilisent --brand-tx (version claire de la couleur, réglée dans features.js) ;
+   ombres neutres (une ombre colorée sur fond sombre fait « halo lumineux ») */
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .btn{box-shadow:none}:root:not([data-theme=light]) .next,:root:not([data-theme=light]) .meCard{box-shadow:0 8px 24px rgba(0,0,0,.45)}}
+:root[data-theme=dark] .btn{box-shadow:none}:root[data-theme=dark] .next,:root[data-theme=dark] .meCard{box-shadow:0 8px 24px rgba(0,0,0,.45)}
 /* deux boutons côte à côte : texte sur une seule ligne */
 .row>.btn{padding-inline:10px;font-size:14px}

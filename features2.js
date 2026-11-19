@@ -18,7 +18,7 @@ function profileHtml(){
  return `<div class="card"><h2 style="margin-bottom:4px">${t('profTitle')}</h2><p class="small" style="margin-bottom:12px">${t('profHint')}</p>
   <label>${t('pseudo')}</label><input class="field" id="pfName" maxlength="20" value="${esc(P.pseudo)}" placeholder="${esc(t('pseudoPh'))}">
   <label>${t('pickEmoji')}</label><div class="emojis">${PROFILE_EMOJIS.map(e=>`<button class="emo ${P.emoji===e?'on':''}" data-emo="${e}" aria-pressed="${P.emoji===e}">${e}</button>`).join('')}</div>
-  <div class="set"><div class="grow"><b>${t('sharePos')}</b><div class="small">${t('sharePosD')}</div></div><button class="sw ${P.share?'on':''}" id="pfShare" aria-label="${esc(t('sharePos'))}"></button></div>
+  <div class="set"><div class="grow"><b>${t('sharePos')}</b><div class="small">${t('sharePosD')}</div></div><button class="sw ${P.share?'on':''}" id="pfShare" role="switch" aria-checked="${!!P.share}" aria-label="${esc(t('sharePos'))}"></button></div>
   ${P.share?`<div class="row" style="margin-top:12px"><div class="emk big">${esc(myEmoji())}</div><div class="grow"><b>${esc(myName())}</b><div class="small">${P.at?t('posAge',{n:mins}):t('posNone')}</div></div></div>
   <div class="row" style="margin-top:12px;gap:8px"><button class="btn" id="pfPos">${t('posUpdate')}</button><button class="btn ghost" id="pfMap">${t('posSee')}</button></div>`:''}
   <p class="small" style="margin-top:12px">${t('posPrivacy')}</p></div>`;
@@ -27,7 +27,7 @@ function prayerPrefsHtml(){
  const P=getProfile();
  return `<div class="card"><h2 style="margin-bottom:4px">${t('myPrayerTimes')}</h2><p class="small" style="margin-bottom:8px">${t('myPrayerTimesD')}</p>
   <select id="pfPm"><option value="0">${t('cityTlse')}</option>${MOSQUEES.map(m=>`<option value="${m.id}" ${m.id===prayMosque?'selected':''}>${esc(m.nom)}</option>`).join('')}</select>
-  <div class="set" style="border:0;padding-top:4px"><div class="grow"><b>${t('prayNotif')}</b><div class="small">${t('prayNotifD')}</div></div><button class="sw ${P.prayNotif?'on':''}" id="pfNotif" aria-label="${esc(t('prayNotif'))}"></button></div>
+  <div class="set" style="border:0;padding-top:4px"><div class="grow"><b>${t('prayNotif')}</b><div class="small">${t('prayNotifD')}</div></div><button class="sw ${P.prayNotif?'on':''}" id="pfNotif" role="switch" aria-checked="${!!P.prayNotif}" aria-label="${esc(t('prayNotif'))}"></button></div>
   <div class="row" style="gap:8px;margin-top:8px"><button class="btn ghost" id="pfTestBan">${t('testBanner')}</button><button class="btn ghost" id="pfTestNot">${t('testNotif')}</button></div>
   <p class="small" style="margin-top:12px">${t('notifLimit')}</p></div>`;
 }
@@ -78,14 +78,14 @@ const saveTrips=()=>store.set('trips',_trips);
 const allTrips=()=>DEMO_TRIPS.map(demoTrip).concat(myTrips().filter(x=>x.status==='validated').map(x=>({...x,pseudo:myName(),emoji:myEmoji(),mine:true})));
 let rdvView='board',boardMosque=0;
 const dayLabel=d=>t(d==='tomorrow'?'tomorrow':'today');
-const kmFromMe=p=>p&&p.lat?dist(pos,p).toFixed(1)+' km':'';
+const kmFromMe=p=>p&&p.lat?fmtKm(dist(pos,p)):'';
 
 function tripCard(x,opts){
  const m=mq(x.m),seats=x.kind==='offer'&&x.seats?' · '+t('seatsN',{n:x.seats}):'';
  return `<div class="card trip ${x.kind}" data-trip="${x.id}"><div class="row"><div class="emk">${esc(x.emoji||'🚗')}</div>
   <div class="grow"><b>${esc(x.pseudo||t('me'))}</b>${x.demo?` <span class="small">${t('demoTag')}</span>`:''}${x.mine?` <span class="small">· ${t('mine')}</span>`:''}
   <div class="small">${esc(m.nom)}</div><div class="small">${esc(rdvTargetLabel(x.p))} · ${dayLabel(x.day)} ${esc(x.time)}${seats}</div>
-  ${x.from?`<div class="small">${t('departFrom',{d:kmFromMe(x.from)})}</div>`:''}</div>
+  ${x.from&&!x.mine?`<div class="small">${t('departNear',{d:kmFromMe(x.from)})}</div>`:''}</div>
   <span class="tag ${x.kind}">${t(x.kind==='offer'?'tagOffer':'tagSeek')}</span></div>
   <div class="row" style="gap:8px;margin-top:10px">${opts.mine
    ?`<button class="btn ghost sm" data-tmap="${x.id}">${t('posSee')}</button><button class="btn ghost sm" data-tdel="${x.id}">${t('cancelTrip')}</button>`
@@ -124,7 +124,8 @@ function onRdvClick(e){
  const nw=e.target.closest('[data-new]');if(nw)return newTripSheet(boardMosque||null,null,nw.dataset.new);
  const c=e.target.closest('[data-tcontact]');if(c)return contactTrip(c.dataset.tcontact);
  const mp=e.target.closest('[data-tmap]');if(mp)return showTripOnMap(mp.dataset.tmap);
- const d=e.target.closest('[data-tdel]');if(d){_trips=myTrips().filter(x=>String(x.id)!==d.dataset.tdel);saveTrips();toast(t('tripCancelled'));return renderRdv()}
+ const d=e.target.closest('[data-tdel]');if(d){const old=myTrips().slice();_trips=old.filter(x=>String(x.id)!==d.dataset.tdel);saveTrips();renderRdv();
+  return toast(t('tripCancelled'),{action:()=>{_trips=old;saveTrips();if(cur==='rdv')renderRdv()}})}
  const chip=e.target.closest('.chip[data-p]');
  if(chip){const r=rdvs.find(x=>x.id===+chip.closest('.card').dataset.id);if(!r)return;const msg={from:'me',k:chip.dataset.p};if(chip.dataset.place&&MEET_PLACES.includes(chip.dataset.place))msg.place=chip.dataset.place;r.msgs.push(msg);store.set('rdvs',rdvs);renderRdv()}
 }
@@ -181,7 +182,7 @@ function newTripSheet(preMosque,preTarget,preKind){
  $('#rcl').onclick=()=>{_draft=null;$('#sheet').classList.remove('on')};
  $('#rok').onclick=()=>{
   const x=collect();
-  if(!/^\d{2}:\d{2}$/.test(x.time))return toast(t('needTime'));
+  if(!/^\d{2}:\d{2}$/.test(x.time))return fieldErr('#rt',t('needTime'));
   if(!hasMyPos())return toast(t('needPos'));
   _draft=x;confirmTripSheet(x);
  };
@@ -220,10 +221,11 @@ function renderJoin(){
  ${L.length?`<h2 class="sec">${t('jMine')}</h2>`+L.map(r=>`<div class="card"><b>${esc(r.name)}</b><div class="small">${esc(r.city)} · ${new Date(r.at).toLocaleDateString(lang)}</div><span class="tag pending">${t('jPending')}</span></div>`).join(''):''}`;
  $('#jSend').onclick=()=>{
   const v=id=>$(id).value.trim(),r={name:v('#jName'),addr:v('#jAddr'),city:v('#jCity'),who:v('#jWho'),role:$('#jRole').value,contact:v('#jContact')};
-  if(!r.name||!r.addr||!r.city||!r.who)return toast(t('jMissing'));
-  if(!(validEmail(r.contact)||validPhone(r.contact)))return toast(t('acBad'));
+  const miss=[['name','#jName'],['addr','#jAddr'],['city','#jCity'],['who','#jWho']].find(([k])=>!r[k]);
+  if(miss)return fieldErr(miss[1],t('jRequired'));
+  if(!(validEmail(r.contact)||validPhone(r.contact)))return fieldErr('#jContact',t('jBadContact'));
   if(!JOIN_ROLES.includes(r.role))return;
-  if(!$('#jOk').checked)return toast(t('jNeedOk'));
+  if(!$('#jOk').checked)return fieldErr('#jOk',t('jNeedOk'));
   joinReqs().unshift({...r,at:Date.now(),status:'pending'});store.set('joinReqs',_joins);toast(t('jSent'));renderJoin();
  };
 }
@@ -235,18 +237,20 @@ const mosqueUrl=id=>location.href.split('#')[0]+'#mosquee='+id;
 function renderMosquePage(){
  const m=mq(pageMosque);if(!m)return;
  const don=donLink(m.id),isM=role==='mosquee',n=allTrips().filter(x=>x.m===m.id&&x.g===getGender()).length;
- $('#mosqueBody').innerHTML=`<div class="mhero" style="background:${m.color}"><div class="ico" style="background:rgba(255,255,255,.2)">${I.dome}</div><h2>${esc(m.nom)}</h2><div class="small" style="color:#fff;opacity:.9">${esc(m.adr||'')}</div><div class="small" style="color:#fff;opacity:.9;margin-top:2px">${m.lat?dist(pos,m).toFixed(1)+' km':''}</div></div>
+ const links=(m.site?`<a href="${esc(m.site)}" target="_blank" rel="noopener">${t('site')}</a>`:'')+(typeof MAWAQIT!=='undefined'&&MAWAQIT[m.id]?`<a href="https://mawaqit.net/en/m/${MAWAQIT[m.id].slug}" target="_blank" rel="noopener">Mawaqit</a>`:'');
+ $('#mosqueBody').innerHTML=`<div class="mhero" style="background-color:${m.color}"><div class="ico" style="background:rgba(255,255,255,.2)">${I.dome}</div><h2>${esc(m.nom)}</h2><div class="mheroTx">${esc(m.adr||'')}</div><div class="mheroTx" style="margin-top:2px">${m.lat?fmtKm(dist(pos,m)):''}</div></div>
+ ${links?`<div class="mlinks">${links}</div>`:''}
  <div class="mgrid">
-  <button class="mtile" id="mpDon"><span>🤲</span><b>${t('donate')}</b><div class="small">${don?t('donateD'):t('donNone')}</div></button>
-  <button class="mtile" id="mpCov"><span>🚗</span><b>${t('carpool')}</b><div class="small">${getGender()?t('tripsN',{n}):t('carpoolD')}</div></button>
-  <button class="mtile" id="mpTimes"><span>🕐</span><b>${t('prayers')}</b><div class="small">${t('timesD')}</div></button>
-  <button class="mtile" id="mpRoute"><span>🧭</span><b>${t('route')}</b><div class="small">${t('routeD')}</div></button>
+  <button class="mtile" id="mpTimes"><div class="ico" style="background:${m.color}">${I.prayers}</div><b>${t('prayers')}</b><div class="small">${t('timesD')}</div></button>
+  <button class="mtile" id="mpRoute"><div class="ico" style="background:${m.color}">${I.map}</div><b>${t('route')}</b><div class="small">${t('routeD')}</div></button>
+  <button class="mtile" id="mpCov"><div class="ico" style="background:${m.color}">${I.car}</div><b>${t('carpool')}</b><div class="small">${getGender()?t('tripsN',{n}):t('carpoolD')}</div></button>
+  <button class="mtile" id="mpDon"><div class="ico" style="background:${m.color}">${ICON_HEART}</div><b>${t('donate')}</b><div class="small">${don?t('donateD'):t('donNone')}</div></button>
  </div>
  ${isM?`<div class="card"><h2 style="margin-bottom:4px">${t('donSetTitle')}</h2><p class="small" style="margin-bottom:8px">${t('donSetD')}</p><input class="field" id="mpDonUrl" dir="ltr" inputmode="url" value="${esc(don)}" placeholder="https://"><button class="btn" id="mpDonSave">${t('save')}</button></div>`:''}
  <p class="small">${t('src_'+m.src)}</p>`;
  $('#mpDon').onclick=()=>{if(don)window.open(don,'_blank','noopener');else toast(t('donNone'))};
  $('#mpCov').onclick=()=>{boardMosque=m.id;rdvView='board';go('rdv')};
- $('#mpTimes').onclick=()=>{prayMosque=m.id;store.set('pm',prayMosque);fillPm();loadTimes();go('prayers')};
+ $('#mpTimes').onclick=()=>showMosqueTimes(m.id); // affiche ses horaires SANS remplacer la mosquée enregistrée
  $('#mpRoute').onclick=()=>{go('map');setTimeout(()=>{selectMosque(m.id);showRoute(m.id)},150)};
  const sv=$('#mpDonSave');if(sv)sv.onclick=()=>{const u=$('#mpDonUrl').value.trim();if(u&&!/^https:\/\/[^\s<>"]+\.[^\s<>"]+$/.test(u))return toast(t('donBad'));store.set('don_'+m.id,u);toast(t('saved'));renderMosquePage()};
 }
@@ -254,7 +258,7 @@ function openMosquePage(id){if(!mq(id))return;pageMosque=id;go('mosque')}
 function readHash(){const h=/#mosquee=(\d+)/.exec(location.hash);if(h&&mq(+h[1])&&+h[1]!==99){openMosquePage(+h[1]);return true}return false}
 
 /* ---------- avant la prière : bandeau sur les vidéos + notification « mode avion » ---------- */
-let _banTest=0,_notified=null; // lu au premier usage (store n'existe pas encore au chargement)
+let _banTest=0,_banHidden=null,_notified=null; // lu au premier usage (store n'existe pas encore au chargement)
 const PRAY_LEAD=15; // minutes avant l'adhan
 function nextPrayer(){
  const now=new Date(),c=now.getHours()*60+now.getMinutes(),mins=h=>{const[a,b]=h.split(':');return +a*60+ +b};
@@ -266,13 +270,14 @@ function checkPrayerTime(){
  const b=$('#prayBanner');if(!b)return;
  let{k,diff,at}=nextPrayer();const test=_banTest>Date.now();
  if(test){diff=14}
- const show=test||(diff>0&&diff<=PRAY_LEAD);
+ const P=getProfile(),key=dayKey()+'_'+k;
+ const show=test||(diff>0&&diff<=PRAY_LEAD&&_banHidden!==key);
  if(show){
-  b.innerHTML=`<div class="pbIco">🕌</div><div class="grow"><b>${t('banTitle',{p:t(k),n:diff})}</b><div>${t('banText')}</div></div><button id="pbGo">${t('banGo')}</button>`;
-  b.classList.add('on');$('#pbGo').onclick=()=>{_banTest=0;go('prayers')};
+  // « J'y vais » ferme le bandeau (on ne renvoie pas plus loin dans l'appli : le but est d'en sortir)
+  b.innerHTML=`<div class="pbIco">${I.dome}</div><div class="grow"><b>${t('banTitle',{p:t(k),n:diff})}</b><div>${t('banText')}</div></div><button id="pbGo">${t('banGo')}</button>`;
+  b.classList.add('on');$('#pbGo').onclick=()=>{_banTest=0;_banHidden=key;b.classList.remove('on');toast(t('banBye'))};
  }else b.classList.remove('on');
  // notification « mode avion » : une seule fois par prière et par jour
- const P=getProfile(),key=dayKey()+'_'+k;
  if(!_notified)_notified=store.get('notified',{});
  if(!test&&P.prayNotif&&diff>0&&diff<=PRAY_LEAD&&!_notified[key]){_notified={[key]:1};store.set('notified',_notified);showPrayNotif(k,diff)}
 }

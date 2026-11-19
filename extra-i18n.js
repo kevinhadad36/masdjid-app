@@ -145,3 +145,44 @@ Object.assign(TR.en,{
  notifTitle:'🕌 {p} in {n} min',notifBody:'Put your phone in airplane mode before prayer.',
  qrTitle2:'Donations · Carpool · Prayer times',qrScan2:'Scan to open the mosque page'
 });
+
+// --- Corrections du 19/11/2026 (critique Impeccable) : navigation, erreurs précises, annulation, textes ---
+// Règle du ton : « tu » pour les fidèles, « vous » pour les responsables de mosquée (ajout de mosquée, dons, stories).
+Object.assign(TR.fr,{
+ noRdv:'Aucun message pour l\'instant. Touche « Demander une place » sur un trajet pour écrire.',
+ rdv:'Trajets',vBoard:'Tous',navLabel:'Navigation principale',play:'Lire',mosque:'Mosquée',
+ storiesD:'Annonces des mosquées (24 h)',
+ inM:'dans {m} min',departNear:'Départ à {d} de toi',fromYou:'depuis ta position',
+ deg:'{d}° depuis le nord · tiens le haut du téléphone vers le nord',
+ undo:'Annuler',retry:'Réessayer',
+ posNo:'Position refusée : autorise la localisation pour ce site dans les réglages du navigateur.',
+ routeFail:'Itinéraire indisponible (connexion ?).',
+ acBad_email:'Adresse e-mail incomplète. Exemple : prenom@exemple.fr',
+ acBad_phone:'Numéro trop court : il faut au moins 9 chiffres. Exemple : 06 12 34 56 78',
+ acOutDone:'Tu es déconnecté(e)',
+ cDeleted:'Cours supprimé',cNeedTitle:'Donne un titre au cours (60 caractères max.)',cNeedTime:'Choisis l\'heure du cours',
+ jRequired:'Ce champ est obligatoire',jBadContact:'Indiquez un e-mail (nom@exemple.fr) ou un numéro d\'au moins 9 chiffres',
+ banBye:'Qu\'Allah accepte ta prière',
+ pmTemp:'Horaires de cette mosquée. Ta mosquée enregistrée reste : {m}.',pmKeep:'En faire ma mosquée'
+});
+Object.assign(TR.en,{
+ rdv:'Trips',vBoard:'All',navLabel:'Main navigation',play:'Play',mosque:'Mosque',
+ storiesD:'Mosque announcements (24 h)',
+ inM:'in {m} min',departNear:'Starts {d} from you',fromYou:'from your location',
+ deg:'{d}° from north · point the top of your phone north',
+ undo:'Undo',retry:'Retry',
+ posNo:'Location denied: allow location for this site in your browser settings.',
+ routeFail:'Directions unavailable (connection?).',
+ acBad_email:'Incomplete email address. Example: name@example.com',
+ acBad_phone:'Number too short: at least 9 digits. Example: 06 12 34 56 78',
+ acOutDone:'You are signed out',
+ cDeleted:'Class deleted',cNeedTitle:'Give the class a title (max 60 characters)',cNeedTime:'Pick the class time',
+ jRequired:'This field is required',jBadContact:'Enter an email (name@example.com) or a number with at least 9 digits',
+ banBye:'May Allah accept your prayer',
+ pmTemp:'Times for this mosque. Your saved mosque stays: {m}.',pmKeep:'Make it my mosque'
+});
+// mots courts aussi dans les autres langues (sinon ils s'afficheraient en français)
+Object.assign(TR.ar,{inM:'بعد {m} د',undo:'تراجع',retry:'إعادة المحاولة'});
+Object.assign(TR.es,{inM:'en {m} min',undo:'Deshacer',retry:'Reintentar'});
+Object.assign(TR.sw,{inM:'baada ya dak {m}',undo:'Tendua',retry:'Jaribu tena'});
+Object.assign(TR.ur,{inM:'{m} منٹ میں',undo:'واپس لیں',retry:'دوبارہ کوشش کریں'});
